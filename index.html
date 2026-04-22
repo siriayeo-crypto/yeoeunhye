@@ -1,1380 +1,1180 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>여은혜 포트폴리오 — Event Operations Specialist</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여은혜 포트폴리오 — Yeo Eunhye</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   DESIGN TOKENS — 이 블록만 바꾸면 전체 디자인이 바뀝니다
-   ============================================================ */
-:root {
-  --bg          : #0E0E0E;
-  --surface     : #161616;
-  --surface-2   : #1C1C1C;
-  --border      : #262626;
-  --border-2    : #333333;
-  --text-head   : #F0EDE8;
-  --text-body   : #B8B4AE;
-  --text-muted  : #565650;
-  --gold        : #C9A96E;
-  --gold-dim    : rgba(201,169,110,.12);
-  --gold-on     : #0E0E0E;
-
-  --f-disp  : 'Cormorant Garamond', Georgia, serif;
-  --f-sans  : 'DM Sans', sans-serif;
-  --f-kr    : 'Noto Sans KR', sans-serif;
-  --f-kr-s  : 'Noto Serif KR', serif;
-
-  --ease    : cubic-bezier(.22,.61,.36,1);
-  --pad     : 72px;          /* 좌우 패딩 */
-  --maxw    : 1240px;
-  --sgap    : 120px;         /* 섹션 상하 여백 */
-}
-
-/* ============================================================
-   RESET
-   ============================================================ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:16px;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text-body);font-family:var(--f-sans);overflow-x:hidden;line-height:1.6}
-a{color:inherit;text-decoration:none}
-ul,ol{list-style:none}
-button{background:none;border:none;cursor:pointer;font:inherit;color:inherit}
-img{display:block;max-width:100%}
-
-/* ============================================================
-   KEYFRAMES
-   ============================================================ */
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes lineGrow{to{height:62%}}
-@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@keyframes scrollPulse{0%,100%{opacity:.35}50%{opacity:1}}
-
-/* ============================================================
-   UTILITY
-   ============================================================ */
-.u-fade{opacity:0;animation:fadeUp .7s var(--ease) both}
-.u-reveal{opacity:0;transform:translateY(18px);transition:opacity .65s var(--ease),transform .65s var(--ease)}
-.u-reveal.in{opacity:1;transform:translateY(0)}
-
-/* ============================================================
-   LAYOUT HELPERS
-   ============================================================ */
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
-.section{padding:var(--sgap) var(--pad)}
-.section .wrap{padding:0}
-
-/* 섹션 레이블 */
-.sec-label{
-  display:flex;align-items:center;gap:12px;
-  font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);
-  margin-bottom:20px;
-}
-.sec-label::before{content:'';display:block;width:24px;height:1px;background:var(--gold);flex-shrink:0}
-
-/* 섹션 타이틀 */
-.sec-title{
-  font-family:var(--f-disp);font-weight:300;
-  font-size:clamp(2rem,3.8vw,3.2rem);
-  color:var(--text-head);line-height:1.2;letter-spacing:.01em;
-  margin-bottom:16px;
-}
-
-/* 섹션 서브타이틀 */
-.sec-sub{
-  font-family:var(--f-kr);font-weight:300;
-  font-size:clamp(.84rem,1.15vw,.94rem);
-  color:var(--text-body);line-height:1.88;
-}
-
-/* 섹션 헤더 공통 여백 */
-.sec-head{margin-bottom:72px}
-
-/* ============================================================
-   GRID DIVIDER — 1px gap trick
-   ============================================================ */
-.grid-div{
-  display:grid;
-  gap:1px;
-  background:var(--border);
-  border:1px solid var(--border);
-}
-
-/* ============================================================
-   BUTTON
-   ============================================================ */
-.btn{
-  display:inline-flex;align-items:center;gap:14px;
-  padding:14px 36px;
-  font-family:var(--f-sans);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
-  position:relative;overflow:hidden;transition:color .32s var(--ease);cursor:pointer;
-}
-.btn--gold{border:1px solid var(--gold);color:var(--gold)}
-.btn--gold::before{
-  content:'';position:absolute;inset:0;background:var(--gold);
-  transform:translateX(-101%);transition:transform .32s var(--ease);z-index:0
-}
-.btn--gold:hover::before{transform:translateX(0)}
-.btn--gold:hover{color:var(--gold-on)}
-.btn span,.btn-arrow{position:relative;z-index:1}
-.btn-arrow{transition:transform .28s}
-.btn:hover .btn-arrow{transform:translateX(5px)}
-
-/* ============================================================
-   NAV
-   ============================================================ */
-.nav{
-  position:fixed;inset:0 0 auto 0;z-index:200;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:24px var(--pad);
-  background:linear-gradient(to bottom,rgba(14,14,14,.95) 0%,transparent 100%);
-  transition:background .3s;
-  opacity:0;animation:fadeDown .7s var(--ease) .1s both;
-}
-.nav.scrolled{background:rgba(14,14,14,.97)}
-.nav-logo{
-  font-family:var(--f-disp);font-weight:300;font-size:.95rem;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--text-head)
-}
-.nav-links{display:flex;gap:40px}
-.nav-links a{
-  font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--text-muted);transition:color .22s
-}
-.nav-links a:hover{color:var(--text-head)}
-.nav-hamburger{display:none;flex-direction:column;gap:5px;padding:4px}
-.nav-hamburger span{display:block;width:22px;height:1px;background:var(--text-head);transition:transform .3s,opacity .3s}
-.nav-hamburger.open span:first-child{transform:translateY(6px) rotate(45deg)}
-.nav-hamburger.open span:last-child{transform:translateY(-6px) rotate(-45deg)}
-
-/* 모바일 메뉴 */
-.nav-mobile{
-  position:fixed;inset:0;z-index:190;background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity .32s var(--ease)
-}
-.nav-mobile.open{opacity:1;pointer-events:auto}
-.nav-mobile ul{display:flex;flex-direction:column;align-items:center;gap:40px}
-.nav-mobile ul a{
-  font-family:var(--f-disp);font-weight:300;font-size:2rem;
-  letter-spacing:.08em;color:var(--text-head);transition:color .22s
-}
-.nav-mobile ul a:hover{color:var(--gold)}
-
-/* ============================================================
-   HERO
-   ============================================================ */
-.hero{
-  position:relative;min-height:100svh;
-  display:flex;flex-direction:column;justify-content:center;
-  padding:140px var(--pad) 100px;overflow:hidden;
-}
-/* 좌측 골드 세로선 */
-.hero::before{
-  content:'';position:absolute;top:15%;left:0;
-  width:2px;height:0;
-  background:linear-gradient(to bottom,transparent,var(--gold) 40%,transparent);
-  animation:lineGrow 1.2s var(--ease) .6s forwards
-}
-/* 그레인 */
-.hero::after{
-  content:'';position:absolute;inset:0;pointer-events:none;opacity:.22;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")
-}
-.hero>*{position:relative;z-index:1}
-
-.hero-label{display:flex;align-items:center;gap:12px;margin-bottom:40px}
-.hero-label-line{width:28px;height:1px;background:var(--gold);flex-shrink:0}
-.hero-label-text{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
-
-.hero-name{margin-bottom:48px}
-.hero-name-kr{
-  display:block;font-family:var(--f-kr-s);font-weight:300;
-  font-size:clamp(3rem,7vw,6rem);color:var(--text-head);
-  letter-spacing:.06em;line-height:1;margin-bottom:8px
-}
-.hero-name-en{
-  display:block;font-family:var(--f-disp);font-style:italic;font-weight:300;
-  font-size:clamp(1.1rem,2.2vw,1.85rem);color:var(--text-muted);
-  letter-spacing:.26em;text-transform:uppercase
-}
-
-.hero-tagline{max-width:700px;margin-bottom:72px}
-.hero-tagline-head{
-  display:block;font-family:var(--f-disp);font-weight:300;
-  font-size:clamp(1.35rem,2.4vw,2.05rem);color:var(--text-head);
-  line-height:1.45;margin-bottom:20px
-}
-.hero-tagline-body{
-  font-family:var(--f-kr);font-weight:300;
-  font-size:clamp(.8rem,1.1vw,.88rem);color:var(--text-body);
-  line-height:1.95;letter-spacing:.04em
-}
-.hero-tagline-body em{font-style:normal;color:var(--text-head)}
-
-.hero-stats{display:flex;margin-bottom:56px}
-.hero-stat{flex:1;max-width:190px;padding:22px 32px 22px 0;border-right:1px solid var(--border)}
-.hero-stat:last-child{border-right:none}
-.hero-stat-num{
-  display:block;font-family:var(--f-disp);font-style:italic;font-weight:300;
-  font-size:clamp(1.9rem,3.2vw,2.7rem);color:var(--gold);line-height:1;margin-bottom:7px
-}
-.hero-stat-lbl{
-  display:block;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted)
-}
-
-.hero-lang{display:flex;align-items:center;gap:10px;margin-bottom:56px}
-.hero-lang-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:.65;flex-shrink:0}
-.hero-lang-text{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted)}
-
-.hero-ticker{
-  margin-bottom:64px;overflow:hidden;
-  -webkit-mask-image:linear-gradient(to right,transparent 0%,black 6%,black 94%,transparent 100%);
-  mask-image:linear-gradient(to right,transparent 0%,black 6%,black 94%,transparent 100%)
-}
-.hero-ticker-track{
-  display:flex;gap:10px;width:max-content;
-  animation:ticker 30s linear infinite
-}
-.hero-ticker-track:hover{animation-play-state:paused}
-.hero-badge{
-  flex-shrink:0;padding:6px 14px;border:1px solid var(--border);
-  font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--text-muted);white-space:nowrap;cursor:default;
-  transition:border-color .22s,color .22s
-}
-.hero-badge:hover{border-color:var(--gold);color:var(--gold)}
-
-.hero-cta{margin-bottom:40px}
-
-.hero-scroll{
-  position:absolute;bottom:40px;right:var(--pad);
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  opacity:0;animation:fadeUp .8s var(--ease) 1.5s both
-}
-.hero-scroll-txt{
-  font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;
-  color:var(--text-muted);writing-mode:vertical-rl
-}
-.hero-scroll-line{
-  width:1px;height:36px;
-  background:linear-gradient(to bottom,var(--text-muted),transparent);
-  animation:scrollPulse 2.2s ease-in-out 2s infinite
-}
-
-/* ============================================================
-   ABOUT
-   ============================================================ */
-.about{background:var(--surface);padding:var(--sgap) var(--pad)}
-.about .wrap{padding:0}
-
-.about-lead{
-  font-family:var(--f-kr);font-weight:300;
-  font-size:clamp(.86rem,1.15vw,.98rem);color:var(--text-body);
-  line-height:1.9;letter-spacing:.03em;
-  max-width:680px;margin-bottom:72px
-}
-
-/* 4단 Stage 그리드 */
-.about-stages{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:1px;background:var(--border);border:1px solid var(--border);
-  margin-bottom:56px
-}
-.stage{
-  background:var(--surface);padding:56px 56px;
-  transition:background .22s
-}
-.stage:hover{background:var(--surface-2)}
-.stage-num{
-  font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:20px
-}
-.stage-title{
-  font-family:var(--f-disp);font-weight:300;
-  font-size:clamp(1.2rem,1.9vw,1.6rem);color:var(--text-head);
-  line-height:1.3;margin-bottom:18px
-}
-.stage-body{
-  font-family:var(--f-kr);font-weight:300;font-size:.83rem;
-  color:var(--text-body);line-height:1.82;margin-bottom:20px
-}
-.stage-value{
-  font-size:.72rem;letter-spacing:.05em;color:var(--gold);
-  border-left:2px solid var(--gold);padding-left:14px
-}
-
-/* 자격 카드 */
-.cred-card{
-  border-left:3px solid var(--gold);padding:36px 48px;
-  background:var(--surface-2)
-}
-.cred-title{
-  font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:18px
-}
-.cred-list{
-  display:flex;flex-wrap:wrap;gap:6px 48px
-}
-.cred-list li{
-  font-family:var(--f-kr);font-weight:300;font-size:.83rem;
-  color:var(--text-body);line-height:1.7
-}
-
-/* ============================================================
-   CORE STRENGTH
-   ============================================================ */
-.strength{background:var(--bg);padding:var(--sgap) var(--pad)}
-.strength .wrap{padding:0}
-
-.str-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:1px;background:var(--border);border:1px solid var(--border)
-}
-.str-card{
-  background:var(--bg);padding:48px 44px;
-  position:relative;transition:background .22s;overflow:hidden
-}
-.str-card::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--gold);transform:scaleX(0);transform-origin:left;
-  transition:transform .32s var(--ease)
-}
-.str-card:hover{background:var(--surface)}
-.str-card:hover::after{transform:scaleX(1)}
-.str-num{
-  font-family:var(--f-disp);font-style:italic;font-size:.88rem;
-  color:var(--text-muted);margin-bottom:18px
-}
-.str-title{
-  font-weight:500;font-size:.93rem;color:var(--text-head);margin-bottom:6px
-}
-.str-sub{font-family:var(--f-kr);font-size:.76rem;color:var(--gold);margin-bottom:10px}
-.str-keys{
-  font-size:.63rem;letter-spacing:.12em;color:var(--text-muted);
-  margin-bottom:16px
-}
-.str-body{
-  font-family:var(--f-kr);font-weight:300;font-size:.81rem;
-  color:var(--text-body);line-height:1.78
-}
-
-/* ============================================================
-   BY THE NUMBERS
-   ============================================================ */
-.numbers{background:var(--surface);padding:var(--sgap) var(--pad)}
-.numbers .wrap{padding:0}
-
-.kpi-map{border-top:1px solid var(--border);margin-bottom:72px}
-.kpi-row{
-  display:flex;align-items:center;gap:32px;
-  padding:20px 0;border-bottom:1px solid var(--border);
-  transition:padding .22s,background .22s
-}
-.kpi-row:hover{background:var(--surface-2);padding-left:16px;padding-right:16px;margin:0 -16px}
-.kpi-type{
-  font-family:var(--f-kr);font-weight:400;font-size:.85rem;
-  color:var(--text-head);min-width:180px
-}
-.kpi-arrow{color:var(--gold);flex-shrink:0}
-.kpi-metric{
-  font-family:var(--f-kr);font-weight:300;font-size:.83rem;color:var(--text-body)
-}
-
-.num-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:1px;background:var(--border);border:1px solid var(--border)
-}
-.num-card{
-  background:var(--surface);padding:44px 32px;text-align:center;
-  transition:background .22s
-}
-.num-card:hover{background:var(--surface-2)}
-.num-val{
-  display:block;font-family:var(--f-disp);font-style:italic;font-weight:300;
-  font-size:clamp(1.8rem,2.8vw,2.6rem);color:var(--gold);
-  line-height:1;margin-bottom:12px
-}
-.num-lbl{
-  display:block;font-family:var(--f-kr);font-weight:300;font-size:.74rem;
-  color:var(--text-muted);line-height:1.6;letter-spacing:.04em
-}
-.num-lbl small{display:block;font-size:.7em;opacity:.7;margin-top:4px}
-
-/* ============================================================
-   PROJECTS
-   ============================================================ */
-.projects{background:var(--bg);padding:var(--sgap) var(--pad)}
-.projects.alt{background:var(--surface)}
-.projects .wrap{padding:0}
-
-.proj-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:1px;background:var(--border);border:1px solid var(--border)
-}
-
-.proj-card{
-  background:var(--bg);display:flex;flex-direction:column;
-  transition:background .22s
-}
-.projects.alt .proj-card{background:var(--surface)}
-.proj-card:hover{background:var(--surface)}
-.projects.alt .proj-card:hover{background:var(--surface-2)}
-
-/* 이미지 영역
-   [이미지 교체] 각 카드의 style="background-image:url('경로')" 교체 */
-.proj-img{
-  aspect-ratio:16/9;
-  background-color:var(--surface-2);
-  background-size:cover;background-position:center;
-  position:relative;overflow:hidden
-}
-.proj-img-ph{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);
-  border:1px dashed var(--border-2)
-}
-
-.proj-body{padding:44px 48px;flex:1;display:flex;flex-direction:column}
-.proj-meta{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-.proj-idx{
-  font-family:var(--f-disp);font-style:italic;font-size:.88rem;color:var(--text-muted)
-}
-.proj-tag{
-  font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);
-  border:1px solid var(--border);padding:3px 10px
-}
-.proj-title{
-  font-family:var(--f-disp);font-weight:300;
-  font-size:clamp(1.35rem,2vw,1.85rem);color:var(--text-head);
-  line-height:1.2;margin-bottom:4px
-}
-.proj-year{
-  font-size:.68rem;letter-spacing:.12em;color:var(--text-muted);margin-bottom:10px
-}
-.proj-scale{
-  font-family:var(--f-kr);font-size:.81rem;color:var(--gold);
-  margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)
-}
-.proj-list{flex:1;margin-bottom:28px}
-.proj-list li{
-  font-family:var(--f-kr);font-weight:300;font-size:.81rem;
-  color:var(--text-body);line-height:1.72;
-  padding-left:20px;position:relative;margin-bottom:6px
-}
-.proj-list li::before{content:'—';position:absolute;left:0;color:var(--text-muted)}
-.proj-link{
-  display:inline-flex;align-items:center;gap:8px;
-  font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--text-muted);margin-top:auto;transition:color .22s
-}
-.proj-link:hover{color:var(--gold)}
-
-/* ============================================================
-   EXPERTISE — ACCORDION
-   ============================================================ */
-.expertise{background:var(--bg);padding:var(--sgap) var(--pad)}
-.expertise .wrap{padding:0}
-
-.accordion{border-top:1px solid var(--border)}
-.acc-item{border-bottom:1px solid var(--border)}
-
-.acc-trigger{
-  width:100%;display:flex;align-items:center;gap:24px;
-  padding:28px 0;text-align:left;transition:color .22s
-}
-.acc-trigger:hover{color:var(--text-head)}
-.acc-idx{
-  font-family:var(--f-disp);font-style:italic;font-size:.88rem;
-  color:var(--text-muted);min-width:28px;flex-shrink:0
-}
-.acc-name{
-  font-family:var(--f-kr-s);font-weight:300;
-  font-size:clamp(.95rem,1.4vw,1.15rem);color:var(--text-head);flex:1
-}
-.acc-icon{
-  width:18px;height:18px;flex-shrink:0;margin-left:auto;position:relative
-}
-.acc-icon::before,.acc-icon::after{
-  content:'';position:absolute;background:var(--text-muted);transition:transform .28s,opacity .28s
-}
-.acc-icon::before{width:14px;height:1px;top:50%;left:2px;transform:translateY(-50%)}
-.acc-icon::after{width:1px;height:14px;left:50%;top:2px;transform:translateX(-50%)}
-.acc-trigger[aria-expanded="true"] .acc-icon::after{transform:translateX(-50%) rotate(90deg);opacity:0}
-.acc-trigger[aria-expanded="true"] .acc-name{color:var(--gold)}
-
-.acc-panel{overflow:hidden;display:none}
-.acc-panel.open{display:block}
-.acc-content{padding:0 0 36px calc(28px + 24px)}
-.acc-sub{
-  font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:6px;margin-top:20px
-}
-.acc-sub:first-child{margin-top:0}
-.acc-text{
-  font-family:var(--f-kr);font-weight:300;font-size:.83rem;
-  color:var(--text-body);line-height:1.82
-}
-
-/* ============================================================
-   PHILOSOPHY
-   ============================================================ */
-.philosophy{background:var(--bg);padding:var(--sgap) var(--pad);text-align:center}
-.philosophy .wrap{padding:0}
-.philosophy .sec-head{margin-bottom:64px}
-
-.phil-body{max-width:700px;margin:0 auto 56px}
-.phil-p{
-  font-family:var(--f-kr);font-weight:300;
-  font-size:clamp(.86rem,1.15vw,.97rem);color:var(--text-body);
-  line-height:1.95;letter-spacing:.03em;
-  margin-bottom:40px;padding-bottom:40px;border-bottom:1px solid var(--border)
-}
-.phil-p:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-
-.phil-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 24px}
-.phil-tag{
-  font-family:var(--f-kr);font-size:.78rem;color:var(--text-muted);letter-spacing:.1em
-}
-.phil-tag+.phil-tag::before{content:'·';margin-right:24px;color:var(--border-2)}
-
-/* ============================================================
-   CONTACT
-   ============================================================ */
-.contact{background:var(--surface);padding:var(--sgap) var(--pad);text-align:center}
-.contact .wrap{padding:0}
-
-.contact-title{
-  font-family:var(--f-disp);font-weight:300;
-  font-size:clamp(2rem,3.8vw,3.2rem);color:var(--text-head);margin-bottom:24px
-}
-.contact-body{
-  font-family:var(--f-kr);font-weight:300;
-  font-size:clamp(.84rem,1.15vw,.95rem);color:var(--text-body);
-  line-height:1.9;margin-bottom:64px
-}
-.contact-info{display:flex;justify-content:center;gap:72px;margin-bottom:64px}
-.contact-link{display:flex;flex-direction:column;gap:6px;transition:color .22s}
-.contact-link:hover{color:var(--gold)}
-.contact-lbl{
-  font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted)
-}
-.contact-val{font-family:var(--f-kr);font-size:1rem;color:var(--text-head)}
-.contact-cta{display:flex;justify-content:center}
-
-/* ============================================================
-   FOOTER
-   ============================================================ */
-.footer{
-  border-top:1px solid var(--border);
-  padding:32px var(--pad);
-  display:flex;justify-content:space-between;align-items:center
-}
-.footer-copy{font-size:.68rem;letter-spacing:.12em;color:var(--text-muted)}
-.footer-top a{
-  font-size:.68rem;letter-spacing:.12em;color:var(--text-muted);transition:color .22s
-}
-.footer-top a:hover{color:var(--gold)}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media(max-width:1024px){
-  :root{--pad:40px;--sgap:96px}
-  .str-grid{grid-template-columns:repeat(2,1fr)}
-  .num-grid{grid-template-columns:repeat(2,1fr)}
-  .hero-stat{max-width:none;padding-right:24px}
-}
-
-@media(max-width:768px){
-  :root{--pad:20px;--sgap:72px}
-  .nav-links{display:none}
-  .nav-hamburger{display:flex}
-  .hero{padding-top:100px;padding-bottom:80px}
-  .hero::before{display:none}
-  .hero-stats{
-    display:grid;grid-template-columns:1fr 1fr;
-    max-width:100%;margin-bottom:48px
+  :root {
+    --ink: #1a1714;
+    --ink-soft: #3d3a36;
+    --ink-light: #6b6560;
+    --paper: #f8f5f0;
+    --paper-warm: #f2ede6;
+    --paper-dark: #e8e2d9;
+    --accent: #8b6f47;
+    --accent-light: #c4a882;
+    --accent-pale: #f0e8db;
+    --line: rgba(139,111,71,0.2);
+    --red-mark: #9b3a2a;
   }
-  .hero-stat{
-    max-width:100%;padding:18px 16px;
-    border-right:1px solid var(--border);border-bottom:1px solid var(--border)
-  }
-  .hero-stat:nth-child(2){border-right:none}
-  .hero-stat:nth-child(3){border-bottom:none}
-  .hero-stat:nth-child(4){border-right:none;border-bottom:none}
-  .hero-scroll{display:none}
-  .about-stages{grid-template-columns:1fr}
-  .stage{padding:40px 28px}
-  .str-grid{grid-template-columns:1fr}
-  .num-grid{grid-template-columns:1fr 1fr}
-  .proj-grid{grid-template-columns:1fr}
-  .proj-body{padding:32px 24px}
-  .kpi-row{flex-wrap:wrap;gap:4px}
-  .kpi-type{min-width:auto;width:100%}
-  .kpi-arrow{display:none}
-  .contact-info{flex-direction:column;align-items:center;gap:36px}
-}
 
-@media(max-width:480px){
-  .hero{padding-top:88px}
-  .num-grid{grid-template-columns:1fr}
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(248,245,240,0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    padding: 0 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem; font-weight: 400; letter-spacing: 0.15em;
+    color: var(--ink); text-decoration: none;
+  }
+  .nav-links {
+    display: flex; gap: 2.5rem; list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.75rem; letter-spacing: 0.12em; color: var(--ink-light);
+    text-decoration: none; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 8rem 5rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0;
+    width: 45%; height: 100%;
+    background: var(--paper-warm);
+    clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+    z-index: 0;
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 680px; }
+
+  .hero-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem; letter-spacing: 0.3em; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 2rem;
+  }
+  .hero-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 300; line-height: 1.1;
+    color: var(--ink); letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .hero-name-en {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.4rem, 3vw, 2.4rem);
+    font-weight: 300; color: var(--ink-light);
+    letter-spacing: 0.08em; margin-bottom: 2.5rem;
+  }
+  .hero-tagline {
+    font-size: 1rem; line-height: 1.9; color: var(--ink-soft);
+    border-left: 2px solid var(--accent); padding-left: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .hero-tags {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem; letter-spacing: 0.15em; color: var(--ink-light);
+    margin-bottom: 3rem;
+  }
+  .kpi-row {
+    display: flex; gap: 3rem; flex-wrap: wrap;
+  }
+  .kpi-item { display: flex; flex-direction: column; }
+  .kpi-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem; font-weight: 600; color: var(--accent);
+    line-height: 1;
+  }
+  .kpi-label {
+    font-size: 0.72rem; letter-spacing: 0.1em; color: var(--ink-light);
+    text-transform: uppercase; margin-top: 0.3rem;
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 6rem 5rem; }
+  .section-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.75rem; letter-spacing: 0.35em; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 1rem; display: block;
+  }
+  .section-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.8rem, 3.5vw, 3rem);
+    font-weight: 300; color: var(--ink); line-height: 1.3;
+    margin-bottom: 3rem;
+  }
+
+  /* ── ABOUT ── */
+  .about { background: var(--paper-warm); }
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+  }
+  .about-headline {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.3rem; font-weight: 400; line-height: 1.8;
+    color: var(--ink); grid-column: 1/-1; margin-bottom: 1rem;
+    padding-bottom: 2rem; border-bottom: 1px solid var(--line);
+  }
+  .step-card {
+    padding: 1.5rem;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    position: relative;
+  }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.7rem; letter-spacing: 0.25em; color: var(--accent-light);
+    text-transform: uppercase; margin-bottom: 0.8rem;
+  }
+  .step-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem; font-weight: 600; color: var(--ink);
+    margin-bottom: 0.8rem;
+  }
+  .step-body { font-size: 0.85rem; line-height: 1.8; color: var(--ink-soft); }
+
+  /* ── PROJECTS ── */
+  .projects-section { background: var(--paper); }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .project-card {
+    background: var(--paper);
+    padding: 2.5rem;
+    cursor: pointer;
+    transition: background 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card:hover { background: var(--accent-pale); }
+  .project-card::after {
+    content: '→';
+    position: absolute; bottom: 2rem; right: 2rem;
+    font-size: 1.2rem; color: var(--accent-light);
+    transition: transform 0.2s;
+  }
+  .project-card:hover::after { transform: translateX(4px); }
+  .project-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem; font-weight: 300; color: var(--paper-dark);
+    line-height: 1; margin-bottom: 1rem;
+  }
+  .project-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.2rem; font-weight: 600; color: var(--ink);
+    margin-bottom: 0.5rem; line-height: 1.3;
+  }
+  .project-sub { font-size: 0.8rem; color: var(--ink-light); margin-bottom: 1.2rem; }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.5rem; }
+  .tag {
+    font-size: 0.65rem; letter-spacing: 0.1em; color: var(--accent);
+    border: 1px solid var(--accent-light); padding: 0.25rem 0.6rem;
+    text-transform: uppercase;
+  }
+  .project-kpis { display: flex; flex-direction: column; gap: 0.4rem; }
+  .project-kpi { font-size: 0.82rem; color: var(--ink-soft); }
+  .project-kpi strong { color: var(--accent); font-weight: 600; }
+
+  /* ── REPORT MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(26,23,20,0.7);
+    backdrop-filter: blur(4px);
+    overflow-y: auto;
+    padding: 3rem 1rem;
+  }
+  .modal-overlay.active { display: flex; justify-content: center; }
+  .modal-box {
+    background: var(--paper);
+    width: 100%; max-width: 820px;
+    min-height: fit-content;
+    border-top: 3px solid var(--accent);
+    position: relative;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal-close {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; justify-content: flex-end;
+    padding: 1.2rem 1.5rem;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+  }
+  .close-btn {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem; letter-spacing: 0.2em; color: var(--ink-light);
+    text-transform: uppercase; background: none; border: none;
+    cursor: pointer; padding: 0.4rem 1rem;
+    border: 1px solid var(--line);
+    transition: all 0.2s;
+  }
+  .close-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* ── REPORT CONTENT ── */
+  .report-body { padding: 3rem 3.5rem 4rem; }
+  .report-header { margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--line); }
+  .report-category {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.75rem; letter-spacing: 0.3em; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .report-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem; font-weight: 400; color: var(--ink);
+    line-height: 1.2; margin-bottom: 0.5rem;
+  }
+  .report-subtitle {
+    font-size: 0.9rem; color: var(--ink-light); margin-bottom: 2rem;
+  }
+  .report-meta {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 0.2rem; }
+  .meta-key { font-size: 0.65rem; letter-spacing: 0.15em; color: var(--accent-light); text-transform: uppercase; }
+  .meta-val { font-size: 0.88rem; color: var(--ink-soft); }
+
+  .report-section { margin: 2.5rem 0; }
+  .report-h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.05rem; font-weight: 600; color: var(--ink);
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.2rem;
+  }
+  .report-h3 {
+    font-size: 0.9rem; font-weight: 700; color: var(--accent);
+    margin: 1.2rem 0 0.6rem;
+  }
+  .report-p {
+    font-size: 0.88rem; line-height: 1.95; color: var(--ink-soft);
+    margin-bottom: 0.8rem;
+  }
+  .report-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.83rem; margin: 1rem 0;
+  }
+  .report-table th {
+    background: var(--paper-dark); text-align: left;
+    padding: 0.6rem 0.8rem; font-weight: 600; color: var(--ink);
+    border-bottom: 2px solid var(--accent-light);
+  }
+  .report-table td {
+    padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line);
+    color: var(--ink-soft); vertical-align: top;
+  }
+  .report-table tr:last-child td { font-weight: 600; color: var(--ink); }
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem; margin: 1rem 0;
+  }
+  .kpi-box {
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    padding: 1.2rem;
+  }
+  .kpi-box-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem; font-weight: 600; color: var(--accent);
+    line-height: 1; margin-bottom: 0.3rem;
+  }
+  .kpi-box-label { font-size: 0.75rem; color: var(--ink-light); line-height: 1.4; }
+
+  .world-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.84rem; margin: 1rem 0;
+  }
+  .world-table th {
+    background: var(--ink); color: var(--paper);
+    padding: 0.6rem 1rem; text-align: left; font-weight: 500;
+    font-size: 0.75rem; letter-spacing: 0.08em;
+  }
+  .world-table td {
+    padding: 0.6rem 1rem; border-bottom: 1px solid var(--line); color: var(--ink-soft);
+  }
+  .world-table tr:nth-child(even) td { background: var(--paper-warm); }
+
+  .competency-list {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0;
+  }
+  .competency-tag {
+    font-size: 0.75rem; padding: 0.35rem 0.8rem;
+    background: var(--ink); color: var(--paper);
+    letter-spacing: 0.05em;
+  }
+
+  .highlight-box {
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent);
+    padding: 1.2rem 1.5rem; margin: 1.5rem 0;
+    font-size: 0.88rem; line-height: 1.8; color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  /* ── STRENGTHS ── */
+  .strengths { background: var(--ink); }
+  .strengths .section-label { color: var(--accent-light); }
+  .strengths .section-title { color: var(--paper); }
+  .strengths-headline {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.2rem; font-weight: 300; color: #b8a898;
+    line-height: 2; margin-bottom: 3rem;
+  }
+  .strengths-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px;
+    background: rgba(255,255,255,0.08);
+  }
+  .strength-card {
+    background: var(--ink); padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.2s;
+  }
+  .strength-card:hover { background: #242018; }
+  .strength-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.7rem; letter-spacing: 0.3em; color: var(--accent-light);
+    margin-bottom: 0.8rem;
+  }
+  .strength-title { font-size: 0.9rem; font-weight: 700; color: var(--paper); margin-bottom: 0.6rem; }
+  .strength-body { font-size: 0.82rem; line-height: 1.8; color: #b0a898; }
+
+  /* ── PHILOSOPHY ── */
+  .philosophy { background: var(--paper-warm); }
+  .phil-intro {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.3rem; font-weight: 300; line-height: 1.9;
+    color: var(--ink); text-align: center;
+    max-width: 600px; margin: 0 auto 4rem; padding-bottom: 2rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .phil-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  .phil-card { padding: 2rem; border: 1px solid var(--line); background: var(--paper); }
+  .phil-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.5rem; font-weight: 300; color: var(--paper-dark);
+    line-height: 1; margin-bottom: 0.8rem;
+  }
+  .phil-title { font-family: 'Noto Serif KR', serif; font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 0.8rem; }
+  .phil-body { font-size: 0.85rem; line-height: 1.85; color: var(--ink-soft); }
+
+  /* ── NUMBERS ── */
+  .numbers { background: var(--paper); padding: 5rem; }
+  .numbers-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .num-box {
+    background: var(--paper); padding: 2.5rem 2rem; text-align: center;
+  }
+  .num-big {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem; font-weight: 600; color: var(--accent);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+  .num-label { font-size: 0.8rem; color: var(--ink-light); line-height: 1.4; }
+
+  /* ── CLOSING ── */
+  .closing { background: var(--ink); padding: 6rem 5rem; text-align: center; }
+  .closing-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.1rem; font-weight: 300; line-height: 2.1;
+    color: #b8a898; max-width: 700px; margin: 0 auto 3rem;
+  }
+  .closing-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem; font-weight: 300; color: var(--paper);
+    letter-spacing: 0.15em; margin-bottom: 0.5rem;
+  }
+  .closing-role { font-size: 0.8rem; letter-spacing: 0.2em; color: var(--accent-light); text-transform: uppercase; }
+
+  /* ── DIVIDER ── */
+  .ornament {
+    text-align: center; padding: 1.5rem;
+    color: var(--accent-light); font-size: 1rem; letter-spacing: 0.3em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 1.5rem; }
+    .nav-links { display: none; }
+    .hero { padding: 7rem 1.5rem 4rem; }
+    .hero::before { width: 0; }
+    section { padding: 4rem 1.5rem; }
+    .about-grid { grid-template-columns: 1fr; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .strengths-grid { grid-template-columns: 1fr; }
+    .phil-grid { grid-template-columns: 1fr; }
+    .numbers-grid { grid-template-columns: repeat(2, 1fr); }
+    .report-body { padding: 2rem 1.5rem 3rem; }
+    .report-meta { grid-template-columns: 1fr 1fr; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .numbers { padding: 4rem 1.5rem; }
+    .closing { padding: 4rem 1.5rem; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ============================================================
-     NAV
-     ============================================================ -->
-<nav class="nav" id="nav">
-  <p class="nav-logo">YEH</p>
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">YEO EUNHYE</a>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
-    <li><a href="#strength">Strength</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#strengths">Strengths</a></li>
+    <li><a href="#philosophy">Philosophy</a></li>
     <li><a href="#numbers">Numbers</a></li>
-    <li><a href="#projects-01">Projects</a></li>
-    <li><a href="#expertise">Expertise</a></li>
-    <li><a href="#contact">Contact</a></li>
   </ul>
-  <button class="nav-hamburger" id="hamburger" aria-label="메뉴">
-    <span></span><span></span>
-  </button>
 </nav>
 
-<div class="nav-mobile" id="navMobile">
-  <ul>
-    <li><a href="#about">About</a></li>
-    <li><a href="#strength">Strength</a></li>
-    <li><a href="#numbers">Numbers</a></li>
-    <li><a href="#projects-01">Projects</a></li>
-    <li><a href="#expertise">Expertise</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</div>
-
-
-<!-- ============================================================
-     01. HERO
-     ============================================================ -->
+<!-- HERO -->
 <section class="hero" id="hero">
-
-  <div class="hero-label u-fade" style="animation-delay:.30s">
-    <span class="hero-label-line"></span>
-    <span class="hero-label-text">Event Operations Specialist · Experience Director</span>
-  </div>
-
-  <div class="hero-name u-fade" style="animation-delay:.44s">
-    <span class="hero-name-kr">여은혜</span>
-    <span class="hero-name-en">Yeo Eunhye</span>
-  </div>
-
-  <div class="hero-tagline u-fade" style="animation-delay:.58s">
-    <span class="hero-tagline-head">매순간 구조를 업그레이드하고<br>결과로 증명해왔습니다.</span>
-    <p class="hero-tagline-body">
-      <em>넓은 시야, 제안력과 판단력, 디테일, 미적 감각</em> —<br>
-      현장의 모든 요소를 직접 다루며<br>
-      브랜딩과 세일즈까지 구조적으로 설계해온 실행 중심형 프로젝트 디렉터입니다.
+  <div class="hero-content">
+    <p class="hero-label">Experience Architect · Event Specialist</p>
+    <h1 class="hero-name">여은혜</h1>
+    <p class="hero-name-en">Yeo Eunhye</p>
+    <p class="hero-tagline">
+      이벤트 운영 전문가 · 경험 설계자<br>
+      현장에 맞게 구조를 업그레이드하고<br>
+      결과로 증명하는 사람
     </p>
-  </div>
-
-  <div class="hero-stats u-fade" style="animation-delay:.72s">
-    <div class="hero-stat">
-      <span class="hero-stat-num">18+</span>
-      <span class="hero-stat-lbl">Years Experience</span>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-num">1,000+</span>
-      <span class="hero-stat-lbl">Events</span>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-num">3.15M</span>
-      <span class="hero-stat-lbl">Visitors</span>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-num">300%</span>
-      <span class="hero-stat-lbl">Revenue Growth</span>
+    <p class="hero-tags">Concert · MICE · Pop-up · Brand · Exhibition · VIP Protocol<br>Korean · Japanese · English</p>
+    <div class="kpi-row">
+      <div class="kpi-item">
+        <span class="kpi-num">18년+</span>
+        <span class="kpi-label">현장 경험</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-num">1,000+</span>
+        <span class="kpi-label">프로젝트</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-num">315만</span>
+        <span class="kpi-label">누적 방문객</span>
+      </div>
     </div>
   </div>
-
-  <div class="hero-lang u-fade" style="animation-delay:.84s">
-    <span class="hero-lang-dot"></span>
-    <span class="hero-lang-text">Korean · Japanese · English</span>
-  </div>
-
-  <div class="hero-ticker u-fade" style="animation-delay:.94s">
-    <div class="hero-ticker-track">
-      <span class="hero-badge">Concerts</span>
-      <span class="hero-badge">Festivals</span>
-      <span class="hero-badge">Awards</span>
-      <span class="hero-badge">Pop-ups</span>
-      <span class="hero-badge">Branding</span>
-      <span class="hero-badge">F&amp;B</span>
-      <span class="hero-badge">Conferences</span>
-      <span class="hero-badge">Exhibitions</span>
-      <span class="hero-badge">VIP Protocol</span>
-      <span class="hero-badge">International</span>
-      <span class="hero-badge">Global Projects</span>
-      <span class="hero-badge">Experience Design</span>
-      <!-- 루프 복사본 -->
-      <span class="hero-badge" aria-hidden="true">Concerts</span>
-      <span class="hero-badge" aria-hidden="true">Festivals</span>
-      <span class="hero-badge" aria-hidden="true">Awards</span>
-      <span class="hero-badge" aria-hidden="true">Pop-ups</span>
-      <span class="hero-badge" aria-hidden="true">Branding</span>
-      <span class="hero-badge" aria-hidden="true">F&amp;B</span>
-      <span class="hero-badge" aria-hidden="true">Conferences</span>
-      <span class="hero-badge" aria-hidden="true">Exhibitions</span>
-      <span class="hero-badge" aria-hidden="true">VIP Protocol</span>
-      <span class="hero-badge" aria-hidden="true">International</span>
-      <span class="hero-badge" aria-hidden="true">Global Projects</span>
-      <span class="hero-badge" aria-hidden="true">Experience Design</span>
-    </div>
-  </div>
-
-  <div class="hero-cta u-fade" style="animation-delay:1.04s">
-    <a href="#projects-01" class="btn btn--gold">
-      <span>포트폴리오 보기</span>
-      <span class="btn-arrow">→</span>
-    </a>
-  </div>
-
-  <div class="hero-scroll">
-    <span class="hero-scroll-txt">Scroll</span>
-    <div class="hero-scroll-line"></div>
-  </div>
-
 </section>
 
-
-<!-- ============================================================
-     02. ABOUT
-     ============================================================ -->
-<section class="about section" id="about">
-<div class="wrap">
-
-  <div class="sec-head u-reveal">
-    <p class="sec-label">About</p>
-    <h2 class="sec-title">요령이 아닌 진심으로,<br>구조를 설계하고 결과로 증명합니다.</h2>
+<!-- ABOUT -->
+<section class="about" id="about">
+  <span class="section-label">About</span>
+  <div class="about-grid">
+    <p class="about-headline">저는 현장에 맞게 구조를 지속적으로 업그레이드하며<br>그 변화를 결과로 증명해왔습니다</p>
+    <div class="step-card">
+      <p class="step-num">Step 01</p>
+      <p class="step-title">무대에 서던 사람</p>
+      <p class="step-body">백제예술대학교 방송연예과 — 연기 전공. 조명·음향·연출·영상을 직접 체험하다. 무대를 만들고, 그 위에 서보았기에 공간의 흐름과 온도를 몸으로 압니다.</p>
+    </div>
+    <div class="step-card">
+      <p class="step-num">Step 02</p>
+      <p class="step-title">4개국에서 사람을 배우다</p>
+      <p class="step-body">일본·호주·뉴질랜드·한국. 바텐더·파인다이닝·호텔 제과주방. 뉴질랜드 Sky City Auckland — 한국인 최초 여성 바텐더 — 7단계 심사를 통과한 그 현장에서 사람과 소비, 감정의 리듬을 배웠습니다.</p>
+    </div>
+    <div class="step-card">
+      <p class="step-num">Step 03</p>
+      <p class="step-title">현장 1,000회 — 실무의 모든 레이어</p>
+      <p class="step-body">콘서트·시상식·팝업·컨퍼런스·VIP 의전, 전시·스포츠·지역축제·정부행사까지. 현장의 모든 포지션을 직접 경험하며 운영이 어떻게 결과로 연결되는지를 구조로 이해했습니다.</p>
+    </div>
+    <div class="step-card">
+      <p class="step-num">Step 04</p>
+      <p class="step-title">지금 — 현장을 가장 깊이 아는 기획자</p>
+      <p class="step-body">실무를 가장 잘 알기에 기획·브랜딩을 더 현실적으로 설계합니다. 클라이언트의 비전과 현장의 현실을 하나의 방향으로 정렬하는 것이 저의 방식입니다.</p>
+    </div>
   </div>
+</section>
 
-  <p class="about-lead u-reveal">
-    1,000회 이상의 현장에서 쌓아온 경험은 단순한 스펙이 아닙니다.<br>
-    현장의 모든 포지션을 직접 경험하며 구조를 이해하고,<br>
-    사람을 읽고 결과를 만드는 방식을 체득해왔습니다.
+<!-- PROJECTS -->
+<section class="projects-section" id="projects">
+  <span class="section-label">Selected Projects</span>
+  <h2 class="section-title">The Proof of Expertise<br>결과로 증명된 현장들</h2>
+  <div class="projects-grid">
+
+    <!-- Card 1: 서울라이트 -->
+    <div class="project-card" onclick="openModal('modal-seoul')">
+      <p class="project-num">01</p>
+      <h3 class="project-title">서울라이트 광화문 2025</h3>
+      <p class="project-sub">광화문광장 일대 야간 빛 축제 | 2024–2025 연말·연초</p>
+      <div class="project-tags">
+        <span class="tag">대형 공공행사</span>
+        <span class="tag">인파 관리</span>
+        <span class="tag">안전</span>
+        <span class="tag">서울시</span>
+      </div>
+      <div class="project-kpis">
+        <p class="project-kpi"><strong>315만 명</strong> 누적 방문객</p>
+        <p class="project-kpi"><strong>4.2배</strong> 전년 대비 증가</p>
+        <p class="project-kpi">전 기간 <strong>무사고</strong> 완수</p>
+        <p class="project-kpi">역대 최고 방문객 수치</p>
+      </div>
+    </div>
+
+    <!-- Card 2: 스크럽대디 -->
+    <div class="project-card" onclick="openModal('modal-scrub')">
+      <p class="project-num">02</p>
+      <h3 class="project-title">Scrub Daddy 팝업스토어</h3>
+      <p class="project-sub">더현대 서울 지하 2층 아이코닉존 | 2025.04.24 – 04.30</p>
+      <div class="project-tags">
+        <span class="tag">브랜드 팝업</span>
+        <span class="tag">매출</span>
+        <span class="tag">MZ 타깃</span>
+        <span class="tag">글로벌 브랜드</span>
+      </div>
+      <div class="project-kpis">
+        <p class="project-kpi"><strong>5만 명</strong> 7일간 방문객</p>
+        <p class="project-kpi">총 매출 <strong>1억 8,020만원</strong> (목표 초과)</p>
+        <p class="project-kpi">최대 대기 <strong>480팀</strong></p>
+        <p class="project-kpi">미국 본사 현장 방문 → 퍼포먼스 감동</p>
+      </div>
+    </div>
+
+    <!-- Card 3: 크런키 -->
+    <div class="project-card" onclick="openModal('modal-crunky')">
+      <p class="project-num">03</p>
+      <h3 class="project-title">크런키 스트레스 타파 학원</h3>
+      <p class="project-sub">대치동 학원가 2층 팝업스토어 | 2026</p>
+      <div class="project-tags">
+        <span class="tag">브랜드 팝업</span>
+        <span class="tag">세계관 설계</span>
+        <span class="tag">체험형 마케팅</span>
+        <span class="tag">롯데웰푸드</span>
+      </div>
+      <div class="project-kpis">
+        <p class="project-kpi">행사 <strong>연장 요청 민원</strong> 다수 발생</p>
+        <p class="project-kpi">자발적 SNS 바이럴 확산</p>
+        <p class="project-kpi">고객사 <strong>재협업</strong> 의사 확인</p>
+        <p class="project-kpi">세계관 몰입형 구조 직접 설계</p>
+      </div>
+    </div>
+
+    <!-- Card 4: 리필드 -->
+    <div class="project-card" onclick="openModal('modal-refilld')">
+      <p class="project-num">04</p>
+      <h3 class="project-title">리필드 팝업스토어</h3>
+      <p class="project-sub">현대백화점 천호점 | 2025.02.09 – 02.16</p>
+      <div class="project-tags">
+        <span class="tag">브랜드 팝업</span>
+        <span class="tag">뷰티</span>
+        <span class="tag">AI 두피케어</span>
+        <span class="tag">CS 상담</span>
+      </div>
+      <div class="project-kpis">
+        <p class="project-kpi">최종일 매출 <strong>2,025,800원</strong> 최고 기록</p>
+        <p class="project-kpi">지점장 "정말 잘 운영되고 있다" 직접 발언</p>
+        <p class="project-kpi">VIP 4층 체험 <strong>별도 제안</strong></p>
+        <p class="project-kpi">고객사 "<strong>빅터를 믿고 맡긴다</strong>"</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- STRENGTHS -->
+<section class="strengths" id="strengths">
+  <span class="section-label">Core Strengths</span>
+  <p class="strengths-headline">
+    1,000번의 현장에서<br>
+    미적 감각으로 공간을 읽고<br>
+    넓은 시야로 구조를 설계하고<br>
+    디테일로 완성도를 높이고<br>
+    제안력과 판단력으로 결과를 만들었습니다.
   </p>
-
-  <div class="about-stages">
-    <div class="stage u-reveal">
-      <p class="stage-num">Stage 01</p>
-      <h3 class="stage-title">무대에서 시작된<br>거시적 시야</h3>
-      <p class="stage-body">연기를 전공하며 연출·조명·음향·영상 전 과정을 경험했습니다. 무대 위와 아래를 모두 경험하며 현장이 유기적으로 작동하는 구조를 이해했습니다.</p>
-      <p class="stage-value">공간과 흐름 전체를 읽고 설계하는 디렉터의 시야</p>
+  <div class="strengths-grid">
+    <div class="strength-card">
+      <p class="strength-num">01</p>
+      <p class="strength-title">Experience Architecture — 경험 설계력</p>
+      <p class="strength-body">현장을 브랜드 경험으로 번역하는 설계력. 동선·인력·공간·콘텐츠를 하나의 흐름으로 연결해 방문객이 브랜드를 온몸으로 기억하게 만듭니다.</p>
     </div>
-    <div class="stage u-reveal">
-      <p class="stage-num">Stage 02</p>
-      <h3 class="stage-title">한계를 돌파하며<br>세운 글로벌 스탠다드</h3>
-      <p class="stage-body">일본 15년 만의 첫 외국인 채용, 뉴질랜드 최대 엔터테인먼트 그룹 SkyCity 7단계 전형 통과. 언어를 넘어 문화까지 체화한 글로벌 인사이트를 쌓았습니다.</p>
-      <p class="stage-value">언어를 넘어 문화까지 체화한 글로벌 인사이트</p>
+    <div class="strength-card">
+      <p class="strength-num">02</p>
+      <p class="strength-title">Brand Sensibility — 브랜드 감각</p>
+      <p class="strength-body">미적 감각과 디테일로 브랜드의 온도를 완성합니다. 스태프의 말투, 공간의 배치, 리워드의 타이밍까지 브랜드 메시지가 현장 전체에 스며들도록 설계합니다.</p>
     </div>
-    <div class="stage u-reveal">
-      <p class="stage-num">Stage 03</p>
-      <h3 class="stage-title">1,000회 현장에서<br>구축한 운영 지능</h3>
-      <p class="stage-body">콘서트, 국제포럼, 브랜드 팝업, VIP 의전, 어린이 행사까지 성격이 다른 1,000여 개 현장. 매 순간 구조를 개선하고 시스템으로 축적해왔습니다.</p>
-      <p class="stage-value">현장에 맞춰 구조를 최적화하는 운영 설계 능력</p>
+    <div class="strength-card">
+      <p class="strength-num">03</p>
+      <p class="strength-title">Field Intelligence — 현장 판단력</p>
+      <p class="strength-body">실무에서 나온 판단력이 전략이 됩니다. 1,000회 이상의 현장 경험이 쌓은 빠른 판단과 상황을 구조적으로 읽는 시야로 문제를 해결합니다.</p>
     </div>
-    <div class="stage u-reveal">
-      <p class="stage-num">Stage 04</p>
-      <h3 class="stage-title">실무를 아는 기획자의<br>현실적 설계</h3>
-      <p class="stage-body">사람의 동선, 공간의 구조, 변수까지 고려한 데이터 기반 기획. 운영자를 넘어 결과를 만들어내는 프로젝트 디렉터로 성장했습니다.</p>
-      <p class="stage-value">운영자를 넘어 결과를 만들어내는 프로젝트 디렉터</p>
+    <div class="strength-card">
+      <p class="strength-num">04</p>
+      <p class="strength-title">Global Communication — 글로벌 소통력</p>
+      <p class="strength-body">언어가 아니라 문화로 신뢰를 만드는 힘. 한국어·일본어·영어, 그리고 4개국 현장 경험. 언어를 넘어 문화적 맥락으로 소통합니다.</p>
+    </div>
+    <div class="strength-card">
+      <p class="strength-num">05</p>
+      <p class="strength-title">Crisis Strategy & Leadership — 위기 대응</p>
+      <p class="strength-body">돌발 상황에서 흔들리지 않는 현장 컨트롤. 먼저 상황을 파악하고, 플랜 B·C를 준비하며 팀 전체가 같은 방향으로 움직이도록 이끕니다.</p>
+    </div>
+    <div class="strength-card">
+      <p class="strength-num">06</p>
+      <p class="strength-title">Safety & Crowd Management — 안전 운영</p>
+      <p class="strength-body">대규모 인파와 안전을 동시에 설계하는 역량. 315만 명 누적 방문객 무사고 운영 포함. 예측과 선제 대응으로 현장의 안정성을 확보합니다.</p>
     </div>
   </div>
+</section>
 
-  <div class="cred-card u-reveal">
-    <h3 class="cred-title">Education &amp; Certifications</h3>
-    <ul class="cred-list">
-      <li>백제예술대학교 방송연예과 — 연기·조명·음향·연출·영상</li>
-      <li>일본어능력시험 JLPT 1급</li>
-      <li>한국사능력시험 1급</li>
-      <li>공연기획사 1급 · CS강사 1급 · 조주기능사</li>
-      <li>컨벤션기획사 2급 필기합격 (실기 준비 중)</li>
-      <li>안전총괄책임자 / 안전관리담당자 교육 수료</li>
-    </ul>
+<!-- PHILOSOPHY -->
+<section class="philosophy" id="philosophy">
+  <span class="section-label">Philosophy</span>
+  <p class="phil-intro">사람들은 경험을 소비하고,<br>그 경험에 의미를 부여합니다.<br>그 의미가 곧 브랜드가 됩니다.</p>
+  <div class="phil-grid">
+    <div class="phil-card">
+      <p class="phil-num">01</p>
+      <p class="phil-title">사람이 브랜드다</p>
+      <p class="phil-body">공간의 온도와 톤앤매너는 결국 현장의 스태프에게서 완성됩니다. 스태프의 표정, 말투, 전문성이 브랜드의 첫인상이자 마지막 기억이 됩니다. 저는 그 사람들을 교육하고 동기부여하며 브랜드의 온도를 현장에서 직접 만들어냅니다.</p>
+    </div>
+    <div class="phil-card">
+      <p class="phil-num">02</p>
+      <p class="phil-title">기억을 파는 공간</p>
+      <p class="phil-body">팝업은 물건이 아니라 브랜드에 부여된 '의미'를 파는 곳입니다. 단순 관람이 아닌 참여를 통해 고객이 스스로 브랜드의 주인공이 되는 여정을 설계합니다.</p>
+    </div>
+    <div class="phil-card">
+      <p class="phil-num">03</p>
+      <p class="phil-title">결과로 증명하는 감각</p>
+      <p class="phil-body">철저하게 계산된 경험은 반드시 숫자로 증명됩니다. 현장의 병목을 해결하는 동선 설계와 심리적 자극을 통해 KPI를 초과 달성해왔습니다.</p>
+    </div>
+    <div class="phil-card">
+      <p class="phil-num">04</p>
+      <p class="phil-title">목적을 읽는 감각</p>
+      <p class="phil-body">행사의 목적에 따라 KPI는 달라집니다. 저는 그 기준을 가장 먼저 파악하고 현장 운영 전체를 그 방향으로 정렬합니다.</p>
+    </div>
   </div>
+</section>
 
-</div>
+<!-- NUMBERS -->
+<section class="numbers" id="numbers">
+  <span class="section-label">Numbers</span>
+  <h2 class="section-title">숫자로 증명된 커리어</h2>
+  <div class="numbers-grid">
+    <div class="num-box"><p class="num-big">18+</p><p class="num-label">Years of Experience</p></div>
+    <div class="num-box"><p class="num-big">1,000+</p><p class="num-label">Events Managed</p></div>
+    <div class="num-box"><p class="num-big">315만</p><p class="num-label">누적 방문객 — 무사고</p></div>
+    <div class="num-box"><p class="num-big">500</p><p class="num-label">최대 동시 운영 인력</p></div>
+    <div class="num-box"><p class="num-big">5</p><p class="num-label">개국 글로벌 현장 경험</p></div>
+    <div class="num-box"><p class="num-big">3</p><p class="num-label">개 언어 구사</p></div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing">
+  <p class="closing-text">
+    진심은 결국 결과로 이어진다고 믿습니다.<br><br>
+    수많은 파트너의 협업으로 만들어낸 하나의 현장이 누군가에게는 단 한 번의 순간일 수 있지만,
+    그 순간의 경험이 남기는 기억에 따라 브랜드의 가치가 확장되는 가장 소중한 조각이 됩니다.<br><br>
+    지난 18년간 저에게는 단 한 번도 소홀히 여길 수 있는 현장이 없었습니다.<br><br>
+    함께 즐겁게 고민하고, 결과로 증명하는 파트너가 되겠습니다.
+  </p>
+  <p class="closing-name">여 은 혜 / Yeo Eun-hye</p>
+  <p class="closing-role">Experience Architect · Event Specialist</p>
 </section>
 
 
-<!-- ============================================================
-     03. CORE STRENGTH
-     ============================================================ -->
-<section class="strength section" id="strength">
-<div class="wrap">
-
-  <div class="sec-head u-reveal">
-    <p class="sec-label">Core Strength</p>
-    <h2 class="sec-title">검증된 역량</h2>
-    <p class="sec-sub">사람을 알기에 세일즈의 방향을 설정하고,<br>현장을 알기에 구조를 설계하며,<br>브랜드가 원하는 성과를 만듭니다.</p>
-  </div>
-
-  <div class="str-grid">
-    <div class="str-card u-reveal">
-      <p class="str-num">01</p>
-      <h3 class="str-title">Experience Architecture</h3>
-      <p class="str-sub">경험 설계력</p>
-      <p class="str-keys">Flow · Experience · Conversion</p>
-      <p class="str-body">동선·인력·공간·콘텐츠를 하나의 흐름으로 연결해 방문객이 브랜드를 온몸으로 기억하게 만듭니다.</p>
+<!-- ══════════════════════════════════════
+     MODAL 01 — 서울라이트 광화문
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-seoul" onclick="closeOnOverlay(event, 'modal-seoul')">
+  <div class="modal-box">
+    <div class="modal-close">
+      <button class="close-btn" onclick="closeModal('modal-seoul')">✕ Close</button>
     </div>
-    <div class="str-card u-reveal">
-      <p class="str-num">02</p>
-      <h3 class="str-title">Brand Sensibility</h3>
-      <p class="str-sub">브랜드 감각</p>
-      <p class="str-keys">Tone · Detail · Consistency</p>
-      <p class="str-body">스태프의 말투, 공간 배치, 리워드 타이밍까지 브랜드 메시지가 현장 전체에 스며들도록 설계합니다.</p>
-    </div>
-    <div class="str-card u-reveal">
-      <p class="str-num">03</p>
-      <h3 class="str-title">Field Intelligence</h3>
-      <p class="str-sub">현장 판단력</p>
-      <p class="str-keys">Insight · Perspective · Decision</p>
-      <p class="str-body">1,000회 이상의 현장 경험이 쌓은 빠른 판단과 상황을 구조적으로 읽는 시야로 문제를 해결합니다.</p>
-    </div>
-    <div class="str-card u-reveal">
-      <p class="str-num">04</p>
-      <h3 class="str-title">Problem Solving</h3>
-      <p class="str-sub">문제 해결력</p>
-      <p class="str-keys">Idea · Alternative · Execution</p>
-      <p class="str-body">현장에서 발견한 비효율을 즉각 개선하고 다음 현장의 시스템으로 적용하는 실행 중심 사고.</p>
-    </div>
-    <div class="str-card u-reveal">
-      <p class="str-num">05</p>
-      <h3 class="str-title">Global Communication</h3>
-      <p class="str-sub">글로벌 소통력</p>
-      <p class="str-keys">Language · Culture · Trust</p>
-      <p class="str-body">한국어·일본어·영어, 4개국 거주 경험. 언어를 넘어 문화적 맥락으로 신뢰를 만듭니다.</p>
-    </div>
-    <div class="str-card u-reveal">
-      <p class="str-num">06</p>
-      <h3 class="str-title">Leadership &amp; Safety Control</h3>
-      <p class="str-sub">리더십 &amp; 안전 관리</p>
-      <p class="str-keys">Direction · Control · Safety · Result</p>
-      <p class="str-body">315만 명 무사고 달성 포함. 대규모 인파와 안전을 동시에 설계하는 현장 컨트롤 역량.</p>
-    </div>
-  </div>
-
-</div>
-</section>
-
-
-<!-- ============================================================
-     04. BY THE NUMBERS
-     ============================================================ -->
-<section class="numbers section" id="numbers">
-<div class="wrap">
-
-  <div class="sec-head u-reveal">
-    <p class="sec-label">By the Numbers</p>
-    <h2 class="sec-title">숫자로 증명된 커리어</h2>
-    <p class="sec-sub">행사의 목적에 따라 KPI는 달라집니다.<br>저는 그 기준을 빠르게 파악하고 현장 운영을 결과로 연결해왔습니다.</p>
-  </div>
-
-  <div class="kpi-map u-reveal">
-    <div class="kpi-row"><span class="kpi-type">공공 · 재단 행사</span><span class="kpi-arrow">→</span><span class="kpi-metric">만족도 · 참여율 · 재참여 의향</span></div>
-    <div class="kpi-row"><span class="kpi-type">팝업 · 브랜드</span><span class="kpi-arrow">→</span><span class="kpi-metric">방문객 수 · 구매전환율 · 매출</span></div>
-    <div class="kpi-row"><span class="kpi-type">신제품 · 론칭</span><span class="kpi-arrow">→</span><span class="kpi-metric">SNS 참여율 · 해시태그 · 도달</span></div>
-    <div class="kpi-row"><span class="kpi-type">페스티벌 · 축제</span><span class="kpi-arrow">→</span><span class="kpi-metric">방문객 수 · 체류시간 · 재방문 의향</span></div>
-    <div class="kpi-row"><span class="kpi-type">대형 공연</span><span class="kpi-arrow">→</span><span class="kpi-metric">안전사고 0건 · 동선 · 응급 대응 속도</span></div>
-  </div>
-
-  <div class="num-grid">
-    <div class="num-card u-reveal"><span class="num-val">18+</span><span class="num-lbl">경력 연수</span></div>
-    <div class="num-card u-reveal"><span class="num-val">1,000+</span><span class="num-lbl">총 운영 행사</span></div>
-    <div class="num-card u-reveal"><span class="num-val">315만</span><span class="num-lbl">누적 방문객<small>서울라이트 광화문 2025</small></span></div>
-    <div class="num-card u-reveal"><span class="num-val">0건</span><span class="num-lbl">안전사고<small>서울라이트 광화문 2025</small></span></div>
-    <div class="num-card u-reveal"><span class="num-val">50,000</span><span class="num-lbl">단일 팝업 방문객<small>스크럽대디 2025</small></span></div>
-    <div class="num-card u-reveal"><span class="num-val">300%</span><span class="num-lbl">팝업 매출 상승<small>스크럽대디</small></span></div>
-    <div class="num-card u-reveal"><span class="num-val">500명</span><span class="num-lbl">최대 스태프 운영<small>현대차 패밀리데이</small></span></div>
-    <div class="num-card u-reveal"><span class="num-val">5년</span><span class="num-lbl">연속 나라장터 총괄<small>2022–2026</small></span></div>
-  </div>
-
-</div>
-</section>
-
-
-<!-- ============================================================
-     05. SELECTED PROJECTS 01
-     ============================================================ -->
-<section class="projects section" id="projects-01">
-<div class="wrap">
-
-  <div class="sec-head u-reveal">
-    <p class="sec-label">Selected Projects 01</p>
-    <h2 class="sec-title">Designed &amp; Delivered</h2>
-    <p class="sec-sub">현장을 직접 설계하고 성과를 만든 프로젝트.<br>경험은 설계될 수 있고, 잘 설계된 경험은 반드시 성과로 이어집니다.</p>
-  </div>
-
-  <div class="proj-grid">
-
-    <!-- 카드 01 -->
-    <!-- [이미지 교체] style="background-image:url('이미지경로')" -->
-    <article class="proj-card u-reveal">
-      <div class="proj-img">
-        <span class="proj-img-ph">Image Coming Soon</span>
-      </div>
-      <div class="proj-body">
-        <div class="proj-meta">
-          <span class="proj-idx">01</span>
-          <span class="proj-tag">공공행사 · 인파관리 · 안전</span>
+    <div class="report-body">
+      <div class="report-header">
+        <p class="report-category">공공·서울시 대형 행사 | Project Report</p>
+        <h2 class="report-title">서울라이트 광화문 2025</h2>
+        <p class="report-subtitle">광화문광장 일대 야간 빛 축제 | 2024–2025 연말·연초</p>
+        <div class="report-meta">
+          <div class="meta-item"><span class="meta-key">주최</span><span class="meta-val">서울시 / 서울관광재단</span></div>
+          <div class="meta-item"><span class="meta-key">카테고리</span><span class="meta-val">공공·서울시 대형 행사</span></div>
+          <div class="meta-item"><span class="meta-key">역할</span><span class="meta-val">현장 운영 총괄팀장</span></div>
+          <div class="meta-item"><span class="meta-key">운영 목표</span><span class="meta-val">최소 인력으로도 안정적으로 운영 가능한 시스템 구축</span></div>
         </div>
-        <h3 class="proj-title">서울라이트 광화문</h3>
-        <p class="proj-year">2025</p>
-        <p class="proj-scale">누적 방문객 315만 명 · 24일 운영 · 전 기간 무사고</p>
-        <ul class="proj-list">
-          <li>전년 대비 4.2배 방문객 증가 속 무사고 달성</li>
-          <li>실시간 인력 재배치 전략으로 운영 안정화</li>
-          <li>소원타일 24,228개 운영 구조 직접 설계</li>
-        </ul>
-        <a href="projects/project-01.html" class="proj-link">상세 보기 →</a>
       </div>
-    </article>
 
-    <!-- 카드 02 -->
-    <article class="proj-card u-reveal">
-      <div class="proj-img">
-        <span class="proj-img-ph">Image Coming Soon</span>
+      <div class="report-section">
+        <h3 class="report-h2">행사 개요</h3>
+        <p class="report-p">서울라이트 광화문은 서울시가 주최하는 대표적인 겨울 야간 문화 콘텐츠 행사입니다. 광화문광장을 중심으로 대형 미디어아트 전시와 다양한 체험형 콘텐츠를 선보이는 도심형 빛 축제로, 매년 연말·연초 시즌에 맞춰 운영됩니다.</p>
+        <p class="report-p">2025 서울라이트 광화문은 광화문 월대, 세종문화회관, 종합안내소 일대, 일월오봉도, 세종 파빌리온 등 주요 공간을 활용해 대규모 미디어 전시와 체험 콘텐츠를 운영했습니다. 정해진 시간마다 상영되는 미디어파사드 쇼, 인터랙티브 작품, 투표형 콘텐츠, 소원타일 프로그램 등이 운영되었습니다.</p>
+        <p class="report-p">서울윈터페스타 기간과 연계되어 크리스마스 마켓, 빛초롱축제, 푸드존 등 인근 행사와의 시너지 효과가 발생했으며, 12월 말과 1월 초에는 송년·신년 행사와 연계되어 관람객 수가 급증했습니다.</p>
       </div>
-      <div class="proj-body">
-        <div class="proj-meta">
-          <span class="proj-idx">02</span>
-          <span class="proj-tag">브랜드 팝업 · 매출 · 글로벌</span>
+
+      <div class="report-section">
+        <h3 class="report-h2">성과 요약</h3>
+        <div class="kpi-grid">
+          <div class="kpi-box"><p class="kpi-box-num">315만</p><p class="kpi-box-label">누적 방문객</p></div>
+          <div class="kpi-box"><p class="kpi-box-num">4.2배</p><p class="kpi-box-label">전년 대비 증가 (전년 75만 명)</p></div>
+          <div class="kpi-box"><p class="kpi-box-num">0건</p><p class="kpi-box-label">중대 안전사고</p></div>
+          <div class="kpi-box"><p class="kpi-box-num">역대 최고</p><p class="kpi-box-label">서울라이트 방문객 수치</p></div>
         </div>
-        <h3 class="proj-title">Scrub Daddy Pop-up</h3>
-        <p class="proj-year">더현대서울 · 2025</p>
-        <p class="proj-scale">1주일 방문객 50,000명 · 매출 300% 상승</p>
-        <ul class="proj-list">
-          <li>운영 구조 개선으로 첫날 대비 매출 300% 달성</li>
-          <li>미국 본사 "글로벌 스탠다드 상회" 극찬</li>
-          <li>클라이언트 재계약 확정</li>
-        </ul>
-        <a href="projects/project-02.html" class="proj-link">상세 보기 →</a>
       </div>
-    </article>
 
-    <!-- 카드 03 -->
-    <article class="proj-card u-reveal">
-      <div class="proj-img">
-        <span class="proj-img-ph">Image Coming Soon</span>
+      <div class="report-section">
+        <h3 class="report-h2">운영 환경</h3>
+        <p class="report-p">혹한기 야외 대형 행사였습니다. 인력 축소, 인파 급증, 우천에 따른 운영 변동, 송년·신년 연계 행사 등 다양한 변수가 동시에 발생했습니다. 이에 따라 "최소 인력으로도 안정적으로 운영 가능한 시스템 구축"을 목표로 운영 체계를 설계하고 실행했습니다.</p>
       </div>
-      <div class="proj-body">
-        <div class="proj-meta">
-          <span class="proj-idx">03</span>
-          <span class="proj-tag">체험형 팝업 · 세계관 · 바이럴</span>
+
+      <div class="report-section">
+        <h3 class="report-h2">시스템 운영 설계</h3>
+
+        <h4 class="report-h3">① 중앙 관리 시스템 구축</h4>
+        <p class="report-p">종합안내소를 중앙관리소로 지정해 다음 체계를 운영했습니다. 인원 교대 보고 체계화, 매 정시 현장 사진 보고, 보고 누락 시 즉시 확인·조치. 이를 통해 개인 판단에 의존하던 운영 방식에서 벗어나 중앙 보고 기반 운영 구조로 전환했습니다.</p>
+
+        <h4 class="report-h3">② 현장 매뉴얼 직접 제작</h4>
+        <p class="report-p">운영 안정화를 위해 다음 항목을 포함한 현장 매뉴얼을 직접 작성해 전 스탭에게 사전 배포했습니다.</p>
+        <p class="report-p">출퇴근 절차 / 장비 불출·반납 및 관리 / 교대 및 휴게 규칙 / 분실물·미아·응급 대응 / 인파 통제 멘트 예시 / 프로그램별 운영 방식</p>
+        <p class="report-p">그 결과 근무자 간 기준이 통일되고, 반복 질문 및 혼선을 최소화할 수 있었습니다. 스탭 개인 역량에 의존하던 방식에서 매뉴얼 기반 시스템 운영으로 전환된 것이 현장 안정화의 핵심이었습니다.</p>
+
+        <h4 class="report-h3">③ 총괄팀장·현장팀장 2층 구조</h4>
+        <p class="report-p">대형 행사 특성상 팀장 1인 체제로는 전체 운영 관리와 개별 대응을 동시에 처리하기 어렵다고 판단했습니다. 총괄팀장이 전체 운영 관리 및 클라이언트 소통을 전담하고, 현장팀장이 인원 체크·혼잡 구간 관리·현장 인력관리를 담당하는 2층 구조를 설계해 운영했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">인력 운영</h3>
+
+        <h4 class="report-h3">형평성 기반 배치 원칙</h4>
+        <p class="report-p">특정 인원에게 업무 강도 또는 불리한 구역이 집중되지 않도록 형평성 있는 배치 원칙을 유지했습니다. 혹한기 장기 근무 특성상 배치 불균형은 즉각적인 피로 누적 및 불만으로 이어질 수 있기 때문에, 동선 거리·체력 부담도·구역별 업무 강도·민원 빈도를 고려해 로테이션을 조정했습니다. 배치 관련 불만 사례는 초반 이후 발생하지 않았습니다.</p>
+
+        <h4 class="report-h3">순환 배치 — 전 구역 커버 가능한 인력화</h4>
+        <p class="report-p">매일 동일 구역 고정 배치가 아닌 조금씩 다른 배치지에서 근무하도록 순환 배치를 실시했습니다. 특정 포지션 의존도를 낮추고, 운영 공백 발생 시 즉시 투입 가능한 인력을 확보하기 위한 전략이었습니다.</p>
+
+        <h4 class="report-h3">특공 인력 편성</h4>
+        <p class="report-p">숙련 인원 중심의 특공팀을 별도로 편성해 다음 역할을 수행했습니다. 넓은 구역 분할 커버 / 혼잡 구간 발생 시 선제 투입 / 돌발 상황·민원 다발 구역 즉각 지원 / 통제 강화 필요 시 집중 배치</p>
+
+        <h4 class="report-h3">출근 관리 체계</h4>
+        <p class="report-p">근무 시작 10분 전까지 도착해 출석 체크 및 장비 착용을 완료하는 것을 원칙으로 운영했습니다. 대기 부담을 최소화하면서도 정시 투입이 자연스럽게 이루어지도록 관리했습니다.</p>
+
+        <h4 class="report-h3">데일리 피드백 루프</h4>
+        <p class="report-p">근무 종료 시 전 인원을 집합시켜 각 구역별 이슈·보완점·피로 요인을 공유하는 데일리 브리핑을 진행했습니다. 문제를 개인 단위로 소모하지 않고 조직 단위로 공유·정리해 다음날 운영에 즉시 반영했습니다.</p>
+
+        <h4 class="report-h3">인력 평가 시스템 운영</h4>
+        <p class="report-p">부팀장 및 핵심 인력을 활용해 인원별 역량과 현장 기여도를 기록했습니다. "잘한다/못한다" 수준이 아닌 "어떤 상황에서 어떤 강점이 있는 인원인지"를 파악하고, 이를 당일·익일 배치 전략 보정과 섭외팀 공유 자료로 활용했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">운영사무국 이용 관리</h3>
+        <p class="report-p">운영사무국은 대행사 및 서울시 관계자 등 외부 인원이 상주하는 공간이었습니다. 내부 이용 시 불필요한 민원이 발생하지 않도록 언행·태도·소음 수준, 복장 및 공간 사용 방식, 외부 관계자 상주 공간임을 인지한 행동 기준을 사전에 충분히 안내했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">이 행사에서 드러난 역량</h3>
+        <div class="competency-list">
+          <span class="competency-tag">대규모 인파 안전 운영</span>
+          <span class="competency-tag">중앙 관리 시스템 설계</span>
+          <span class="competency-tag">현장 매뉴얼 직접 제작</span>
+          <span class="competency-tag">2층 팀장 구조 운영</span>
+          <span class="competency-tag">형평성 기반 배치·로테이션</span>
+          <span class="competency-tag">특공 인력 편성·운용</span>
+          <span class="competency-tag">인력 평가 시스템 운영</span>
+          <span class="competency-tag">데일리 피드백 루프</span>
+          <span class="competency-tag">혹한기 장기 운영 안정화</span>
         </div>
-        <h3 class="proj-title">크런키 스트레스 타파학원</h3>
-        <p class="proj-year">2026</p>
-        <p class="proj-scale">세계관 기반 몰입형 체험 콘텐츠 구조 설계</p>
-        <ul class="proj-list">
-          <li>배역 기반 스태프 퍼포먼스로 현장 에너지 극대화</li>
-          <li>행사 기간 연장 및 자발적 SNS 바이럴 확산</li>
-        </ul>
-        <a href="projects/project-03.html" class="proj-link">상세 보기 →</a>
       </div>
-    </article>
-
-    <!-- 카드 04 -->
-    <article class="proj-card u-reveal">
-      <div class="proj-img">
-        <span class="proj-img-ph">Image Coming Soon</span>
-      </div>
-      <div class="proj-body">
-        <div class="proj-meta">
-          <span class="proj-idx">04</span>
-          <span class="proj-tag">브랜드 팝업 · 세일즈 · 업셀링</span>
-        </div>
-        <h3 class="proj-title">Refill'd Pop-up</h3>
-        <p class="proj-year">현대백화점 천호 · 2025</p>
-        <p class="proj-scale">상담 기반 구매 전환 구조 설계 · 업셀링 견인</p>
-        <ul class="proj-list">
-          <li>고관여 타겟 세일즈 전략으로 매출 상승 직접 견인</li>
-          <li>VIP 체험 확장으로 브랜드 자산 가치 상승 기여</li>
-        </ul>
-        <a href="projects/project-04.html" class="proj-link">상세 보기 →</a>
-      </div>
-    </article>
-
+    </div>
   </div>
 </div>
-</section>
 
 
-<!-- ============================================================
-     06. SELECTED PROJECTS 02
-     ============================================================ -->
-<section class="projects alt section" id="projects-02">
-<div class="wrap">
-
-  <div class="sec-head u-reveal">
-    <p class="sec-label">Selected Projects 02</p>
-    <h2 class="sec-title">Scale &amp; Impact</h2>
-    <p class="sec-sub">대규모 운영과 국가적·VIP 프로젝트.<br>대형 현장은 수많은 변수 속에서 어떻게 대응하느냐가 핵심입니다.</p>
-  </div>
-
-  <div class="proj-grid">
-
-    <article class="proj-card u-reveal">
-      <div class="proj-img"><span class="proj-img-ph">Image Coming Soon</span></div>
-      <div class="proj-body">
-        <div class="proj-meta"><span class="proj-idx">05</span><span class="proj-tag">대형 공연 · 팬데믹 · 무사고</span></div>
-        <h3 class="proj-title">미스터트롯 콘서트</h3>
-        <p class="proj-year">KSPO DOME · 2020</p>
-        <p class="proj-scale">15회 공연 · 7~8만 명 · 세계 최초 팬데믹 유관중 공연</p>
-        <ul class="proj-list">
-          <li>그라운드 총괄 — 방역·안전·운영 3중 구조 설계</li>
-          <li>공연계 재개의 표준 정립</li>
-        </ul>
-        <a href="projects/project-05.html" class="proj-link">상세 보기 →</a>
+<!-- ══════════════════════════════════════
+     MODAL 02 — 스크럽대디
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-scrub" onclick="closeOnOverlay(event, 'modal-scrub')">
+  <div class="modal-box">
+    <div class="modal-close">
+      <button class="close-btn" onclick="closeModal('modal-scrub')">✕ Close</button>
+    </div>
+    <div class="report-body">
+      <div class="report-header">
+        <p class="report-category">브랜드 팝업 | Project Report</p>
+        <h2 class="report-title">Scrub Daddy — 스위트 스크럽 샵</h2>
+        <p class="report-subtitle">더현대 서울 지하 2층 아이코닉존 | 2025.04.24 – 04.30</p>
+        <div class="report-meta">
+          <div class="meta-item"><span class="meta-key">기간</span><span class="meta-val">2025년 4월 24일 – 4월 30일 (7일)</span></div>
+          <div class="meta-item"><span class="meta-key">장소</span><span class="meta-val">더현대 서울 지하 2층 아이코닉존</span></div>
+          <div class="meta-item"><span class="meta-key">클라이언트</span><span class="meta-val">스크럽대디 코리아 (ORIO) × 리스페이스</span></div>
+          <div class="meta-item"><span class="meta-key">역할</span><span class="meta-val">빅터 슈퍼바이저 총괄 (전속 팀장)</span></div>
+          <div class="meta-item"><span class="meta-key">인력</span><span class="meta-val">초일 6명 → 최종 19명 / 팀장 최대 3인 체제</span></div>
+        </div>
       </div>
-    </article>
 
-    <article class="proj-card u-reveal">
-      <div class="proj-img"><span class="proj-img-ph">Image Coming Soon</span></div>
-      <div class="proj-body">
-        <div class="proj-meta"><span class="proj-idx">06</span><span class="proj-tag">국가 행사 · VIP 의전</span></div>
-        <h3 class="proj-title">청와대 국민의 품으로</h3>
-        <p class="proj-year">2022</p>
-        <p class="proj-scale">74년 만의 청와대 민간 개방 · 첫날 1만 명</p>
-        <ul class="proj-list">
-          <li>춘추관 전체 총괄 운영 팀장</li>
-          <li>국가적 관심 집중 민감 현장 안정적 통제</li>
-        </ul>
-        <a href="projects/project-06.html" class="proj-link">상세 보기 →</a>
+      <div class="report-section">
+        <h3 class="report-h2">행사 개요</h3>
+        <p class="report-p">스크럽대디는 미국 ABC 방송 Shark Tank 우승 이후 전 세계적으로 완판 행진을 이어온 글로벌 청소 브랜드입니다. 온도에 따라 질감이 바뀌는 혁신 소재로 만들어진 웃는 얼굴 스펀지로, '갖고 싶은 청소 아이템'으로 차별화에 성공한 브랜드입니다.</p>
+        <p class="report-p">이번 팝업은 국내 최초 팝업스토어로, 디저트 샵 콘셉트(스위트 스크럽 샵)로 기획되었습니다. 국내 최초 굿즈 출시, 던킨과의 콜라보 한정 수세미, 럭키박스, 포토존, 인형뽑기존 등 MZ 타깃 바이럴 구조로 설계된 행사였습니다.</p>
+        <p class="report-p">예상을 크게 초과한 방문객 수, 초기 3일 만에 소진된 물량, 복잡한 이중 계산 시스템 — 초고난도 운영 환경에서 7일간 총괄을 수행했습니다.</p>
       </div>
-    </article>
 
-    <article class="proj-card u-reveal">
-      <div class="proj-img"><span class="proj-img-ph">Image Coming Soon</span></div>
-      <div class="proj-body">
-        <div class="proj-meta"><span class="proj-idx">07</span><span class="proj-tag">글로벌 VVIP · 시상식</span></div>
-        <h3 class="proj-title">AFC Annual Awards Seoul</h3>
-        <p class="proj-year">2023</p>
-        <p class="proj-scale">FIFA 회장 · 사우디/카타르 왕실 · 손흥민 참석</p>
-        <ul class="proj-list">
-          <li>공식 Supervisor — 글로벌 VVIP 현장 운영</li>
-          <li>최상위 프로토콜 환경 안정적 매니지먼트</li>
-        </ul>
-        <a href="projects/project-07.html" class="proj-link">상세 보기 →</a>
+      <div class="report-section">
+        <h3 class="report-h2">성과 요약</h3>
+        <div class="kpi-grid">
+          <div class="kpi-box"><p class="kpi-box-num">5만 명</p><p class="kpi-box-label">총 방문객</p></div>
+          <div class="kpi-box"><p class="kpi-box-num">1억 8,020만</p><p class="kpi-box-label">총 매출 (목표 초과)</p></div>
+          <div class="kpi-box"><p class="kpi-box-num">480팀</p><p class="kpi-box-label">최대 동시 대기</p></div>
+          <div class="kpi-box"><p class="kpi-box-num">7일 연속</p><p class="kpi-box-label">최고 매출 경신</p></div>
+        </div>
       </div>
-    </article>
 
-    <article class="proj-card u-reveal">
-      <div class="proj-img"><span class="proj-img-ph">Image Coming Soon</span></div>
-      <div class="proj-body">
-        <div class="proj-meta"><span class="proj-idx">08</span><span class="proj-tag">기업 행사 · 대규모 인력</span></div>
-        <h3 class="proj-title">현대자동차 패밀리데이</h3>
-        <p class="proj-year">2024–2025</p>
-        <p class="proj-scale">여의도 1.1배 규모 · 스태프 약 500명</p>
-        <ul class="proj-list">
-          <li>하이레벨 보안 환경 인력 운영 구조 재정렬</li>
-          <li>체계적 인력 운영으로 최고 난도 현장 완수</li>
-        </ul>
-        <a href="projects/project-08.html" class="proj-link">상세 보기 →</a>
+      <div class="report-section">
+        <h3 class="report-h2">일별 매출 현황</h3>
+        <table class="report-table">
+          <thead><tr><th>날짜</th><th>팀장</th><th>스탭</th><th>매출</th></tr></thead>
+          <tbody>
+            <tr><td>4/24 (목)</td><td>1명</td><td>6명</td><td>13,000,000원</td></tr>
+            <tr><td>4/25 (금)</td><td>1명</td><td>10명</td><td>20,000,000원</td></tr>
+            <tr><td>4/26 (토)</td><td>2명</td><td>12명</td><td>25,000,000원</td></tr>
+            <tr><td>4/27 (일)</td><td>2명</td><td>16명</td><td>28,000,000원</td></tr>
+            <tr><td>4/28 (월)</td><td>3명</td><td>16명</td><td>29,400,000원</td></tr>
+            <tr><td>4/29 (화)</td><td>3명</td><td>19명</td><td>29,000,000원</td></tr>
+            <tr><td>4/30 (수)</td><td>3명</td><td>19명</td><td>35,800,000원</td></tr>
+            <tr><td><strong>합계</strong></td><td></td><td></td><td><strong>180,200,000원</strong></td></tr>
+          </tbody>
+        </table>
       </div>
-    </article>
 
+      <div class="report-section">
+        <h3 class="report-h2">핵심 운영 기여</h3>
+
+        <h4 class="report-h3">① 인력 재편 설계 — 대행사 설득과 증원 관철</h4>
+        <p class="report-p">초일 6명 체제에서 최종 19명까지 7일간 점진적으로 증원했습니다. 대행사는 인건비 증가로 객단가가 감소할 것을 우려하며 인원 감축을 역제안했습니다. 이에 "7일간 이어지는 팝업에서 스탭이 무리한 스케줄로 지칠 경우 퍼포먼스가 오히려 저하된다"는 논리로 설득해 증원을 관철했습니다.</p>
+        <p class="report-p">실제로 인원 증원 이후 충원에 따른 인건비보다 매출이 더 늘었으며, 계산 실수와 클레임 건수도 줄었습니다. 팀장 3인 역할 분담 구조(총괄전략 / 현장관리 / 카운터총괄)도 직접 설계했습니다.</p>
+
+        <h4 class="report-h3">② 카운터 시스템 즉각 개선</h4>
+        <p class="report-p">초일부터 100종 이상의 상품을 아이패드에서 수기로 검색·입력한 뒤 더현대 PDA에 재입력하는 이중 구조가 심각한 병목을 발생시켰습니다. 이에 현장에서 즉각 분석 후 다음 개선안을 제안하고 적용했습니다.</p>
+        <p class="report-p">벌크 제품 입력 간소화 / 할인 메뉴 별도 구성 / 카운터 구성 재정립 / 현금 결제는 카드 유도 / PDA 2대 → 최종 4대 증설</p>
+        <p class="report-p">결과적으로 계산 속도, 정확도, 클레임 발생 건수 모두 개선되었습니다.</p>
+
+        <h4 class="report-h3">③ 대기 관리 전략 전환</h4>
+        <p class="report-p">캐치테이블 도입 후 평균 300팀, 최대 480팀 대기가 발생했습니다. 계산 속도 향상 이후에는 캐치테이블을 즉각 중단하고 차단봉 줄관리로 전환했습니다. "최대 고객을 받는 방향"으로 판단 기준을 전환한 이 결정이 최고 매출일(3,580만원) 달성에 직접 기여했습니다.</p>
+
+        <h4 class="report-h3">④ 기존 스탭의 성장 지원 — 팀장 발탁</h4>
+        <p class="report-p">이전 행사에서 발굴하고 1년 전부터 직접 섭외해온 장정인 인력을 카운터 팀장으로 발탁했습니다. 환불·교환·외국인 대응·클레임 전담 등 가장 이슈가 집중되는 포지션을 성공적으로 안정화했습니다. 광고주, 대행사, 스탭 모두 만족한 결과였습니다.</p>
+
+        <h4 class="report-h3">⑤ 스탭 몰입도 유지 — 진심의 운영</h4>
+        <p class="report-p">초반 4일간 평균 3시간 수면, 식사 불가 환경에서도 스탭들의 퍼포먼스 유지를 위해 지속적인 피드백과 격려를 이어갔습니다. 스탭들의 노고를 광고주에게 지속적으로 어필한 결과, 광고주가 행사 마지막 날 스탭 전원에게 스크럽대디 제품을 선물로 준비했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">돌발 상황 대응</h3>
+
+        <h4 class="report-h3">물량 3일 만에 소진</h4>
+        <p class="report-p">예상 외 폭발적 수요로 입고 물량이 초일부터 3일 만에 소진되었습니다. 광고주의 미국 추가 발주 조율 중에도 물건 하차·운반·재고 보충 인력을 즉각 재배치했습니다. 더현대 백화점 지침상 끌차 사용 불가 환경에서도 물류 흐름을 유지했습니다.</p>
+
+        <h4 class="report-h3">미국 본사 방문 당일 즉각 대응</h4>
+        <p class="report-p">예고 없이 미국 본사가 방문한다는 소식을 직전에 접한 즉시, 전 스탭에게 "안녕하세요 스크럽대디입니다" 인사 액션을 지시했습니다. 본사 직원이 "에이전시 스탭이 맞냐"고 문의할 정도의 퍼포먼스 수준을 인정받았으며, 광고주가 직접 이 사실을 전하며 감사를 표현했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">고객사 피드백 및 결과</h3>
+        <div class="highlight-box">광고주는 빅터의 운영 방식에 전적으로 만족하며 높은 성과를 인정했습니다. 행사 종료 후 스크럽대디 측이 빅터 본사에 임직원 선물용 제품 별도 발송. 대행사 리스페이스 담당자도 현장 상황 이해 및 스탭 노고에 공감을 표현했습니다.</div>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">이 행사에서 드러난 역량</h3>
+        <div class="competency-list">
+          <span class="competency-tag">인력 재편 및 시스템 설계</span>
+          <span class="competency-tag">대행사 설득과 의사결정</span>
+          <span class="competency-tag">카운터 시스템 즉각 개선</span>
+          <span class="competency-tag">대기 관리 전략 전환</span>
+          <span class="competency-tag">기존 인력의 성장 지원</span>
+          <span class="competency-tag">스탭 몰입도 유지</span>
+          <span class="competency-tag">돌발 상황 선제 대응</span>
+          <span class="competency-tag">매출 기여 논리 설계</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-</section>
 
 
-<!-- ============================================================
-     07. EXPERTISE — ACCORDION
-     ============================================================ -->
-<section class="expertise section" id="expertise">
-<div class="wrap">
+<!-- ══════════════════════════════════════
+     MODAL 03 — 크런키
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-crunky" onclick="closeOnOverlay(event, 'modal-crunky')">
+  <div class="modal-box">
+    <div class="modal-close">
+      <button class="close-btn" onclick="closeModal('modal-crunky')">✕ Close</button>
+    </div>
+    <div class="report-body">
+      <div class="report-header">
+        <p class="report-category">브랜드 팝업 · 세계관 설계 | Project Report</p>
+        <h2 class="report-title">크런키 스트레스 타파 학원</h2>
+        <p class="report-subtitle">대치동 학원가 2층 팝업스토어 | 2026</p>
+        <div class="report-meta">
+          <div class="meta-item"><span class="meta-key">클라이언트</span><span class="meta-val">롯데웰푸드 크런키</span></div>
+          <div class="meta-item"><span class="meta-key">역할</span><span class="meta-val">운영 총괄 + 세계관 설계 + 브랜드 경험 디렉터</span></div>
+          <div class="meta-item"><span class="meta-key">인력</span><span class="meta-val">팀장 2인 (여은혜, 하창오) / 스탭 15인</span></div>
+        </div>
+      </div>
 
-  <div class="sec-head u-reveal">
-    <p class="sec-label">Expertise</p>
-    <h2 class="sec-title">전문 분야</h2>
+      <div class="report-section">
+        <h3 class="report-h2">행사 개요</h3>
+        <p class="report-p">크런키의 "바삭한 식감 = 스트레스 해소"라는 브랜드 아이덴티티를 오프라인 공간에 구현한 체험형 팝업스토어입니다. 대치동 학원가에 위치한 2층 규모 공간을 실제 학원처럼 운영하는 콘셉트로 기획되었습니다.</p>
+        <p class="report-p">스매쉬 클래스, 샤우팅 클래스, 원샷 클래스 등 3교시 구성의 체험 프로그램과 스트레스 레벨 진단, 두들링존, 굿즈존 등 다양한 콘텐츠로 구성되었습니다. 방문객이 프로그램에 순차 참여하며 자연스럽게 브랜드 경험을 형성하도록 동선이 설계된 행사였습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">성과 요약</h3>
+        <table class="report-table">
+          <thead><tr><th>지표</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td>현장 반응</td><td>"재미있다", "스트레스가 풀린다" 다수</td></tr>
+            <tr><td>입소문</td><td>학원가·학부모 커뮤니티 중심 자발 확산</td></tr>
+            <tr><td>행사 연장</td><td>방문객 연장 요청 민원 다수 발생</td></tr>
+            <tr><td>고객사 반응</td><td>"향후에도 빅터와 다시 일하고 싶다" 재협업 의사 확인</td></tr>
+            <tr><td>SNS</td><td>방문객 자발적 콘텐츠 생성 및 확산 달성</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">전체 운영 총괄 방향</h3>
+        <p class="report-p">이번 팝업의 핵심 판단은 하나였습니다. "체험 부스의 나열처럼 보이면 안 된다."</p>
+        <p class="report-p">콘셉트가 '크런키 스트레스 타파 학원'인 만큼, 현장 전체가 하나의 학원처럼 작동해야 방문객의 기억에 남는다고 판단했습니다. 이에 현장을 하나의 무대(Stage)처럼 운영하는 방향을 설정했습니다.</p>
+        <p class="report-p">스탭은 단순 응대 인력이 아니라 현장 퍼포머이자 조교 역할을 수행하고, 방문객은 단순 관람객이 아니라 학원에 입장한 학생으로 기능하도록 구조를 설계했습니다. 공간 연출, 멘트, 체험 동선, 리워드 지급 방식, 팀 운영 방식까지 전반적인 운영 흐름을 일관되게 통일했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">세계관 운영 구조 — 현장 재설계</h3>
+        <p class="report-p">오픈 직후 현장을 확인하며 기획서에 명시된 세계관이 실제 운영 언어와 행동 구조로 구현되지 않고 있음을 파악했습니다. 현장에서 다음 7개 세계관 요소를 직접 재정의하고 전 스탭에게 통일 적용했습니다.</p>
+        <table class="world-table">
+          <thead><tr><th>현실</th><th>세계관 언어</th></tr></thead>
+          <tbody>
+            <tr><td>방문객</td><td>학생</td></tr>
+            <tr><td>스탭</td><td>조교</td></tr>
+            <tr><td>체험 프로그램</td><td>클래스</td></tr>
+            <tr><td>SNS 이벤트</td><td>출석 체크</td></tr>
+            <tr><td>리워드</td><td>장학금</td></tr>
+            <tr><td>재방문 고객</td><td>우수 장학생</td></tr>
+            <tr><td>완주 선언</td><td>장학생 인정식</td></tr>
+          </tbody>
+        </table>
+        <p class="report-p">나이에 관계없이 모든 방문객을 "우리 학생"으로 통일 호칭한 부분이 현장 몰입도를 높이는 데 특히 효과적이었습니다. 저학년·고학년 표현을 자연스럽게 활용해 어린 방문객뿐 아니라 성인도 웃으며 콘셉트 안으로 들어오도록 유도했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">브랜드 각인 구조 강화</h3>
+        <p class="report-p">초기 운영 구조를 확인했을 때, 체험은 재미있을 수 있으나 "크런키" 브랜드명이 충분히 반복되지 않으면 방문객이 '재밌는 행사였다'로만 기억하고 브랜드 회상까지 이어지지 않을 수 있다고 판단했습니다.</p>
+
+        <h4 class="report-h3">단체 인사 멘트 도입</h4>
+        <p class="report-p">모든 클래스 시작 시점에 "안녕하세요, 크런키 스트레스 타파 학원입니다"라는 단체 인사를 도입했습니다. 이 인사는 방문객의 시선을 집중시키는 오프닝 장치이자, 스탭들의 호흡을 맞추는 현장 구호이며, 브랜드명을 반복 노출시키는 장치로 동시에 작동했습니다.</p>
+
+        <h4 class="report-h3">체험 멘트 전면 재정비</h4>
+        <p class="report-p">단순히 "체험 시작하겠습니다"가 아니라 "크런키 스매쉬 클래스입니다", "스트레스 타파 성공", "사진 찍을 땐 '크런키'하고 찍어주세요"처럼 팝업 세계관과 브랜드를 체험 언어에 자연스럽게 녹였습니다. 브랜드 특징인 "바삭함"도 체험 완료 시 멘트에 삽입해 이미지가 체험 언어 안에 스며들도록 구성했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">공간 에너지 설계 — 2층에서 1층으로</h3>
+        <p class="report-p">이번 현장에서 2층 체험존이 전체 행사의 핵심 에너지원이라고 판단했습니다. 스매쉬·샤우팅·원샷 클래스 등 직접적인 참여와 반응이 일어나는 프로그램들이 2층에 집중되어 있었기 때문에, 2층의 온도와 텐션이 현장 전체 분위기를 결정한다고 보았습니다.</p>
+        <p class="report-p">전략은 하나였습니다. 먼저 2층의 분위기를 확실히 살리고, 그 에너지를 아래층으로 퍼뜨리는 것. 2층에서는 체험 시작 전 시선 집중, 스탭들의 단체 호응 타이밍 통일, 방문객의 망설임을 줄이는 적극적인 참여 유도, 체험 완료 후 감정 고조 유지를 집중 관리했습니다.</p>
+        <p class="report-p">이후 2층에서 분위기 적응이 된 인력을 1층에 적절히 섞어 배치해, 1층의 비교적 정적인 공간도 동일한 톤으로 흘러가도록 조정했습니다. 결과적으로 1층과 2층의 온도 차가 줄어들었고, 현장 전체가 활기차고 응대 품질이 높다는 인상을 만들 수 있었습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">리워드 존 — '체험의 피날레'로 설계</h3>
+        <p class="report-p">대부분의 팝업에서 리워드 존은 체험의 마지막 행정 단계처럼 운영됩니다. 이번 현장에서는 달리 접근했습니다. 리워드 존이 체험 경험을 마무리하는 마지막 장면이자, 방문객 감정이 가장 정리되는 구간이라고 판단했습니다.</p>
+        <p class="report-p">모든 클래스를 완료한 방문객에게 "모든 클래스를 수강하셔서 크런키 스트레스 타파 학원의 장학생이 되셨습니다"라는 멘트를 진행하고, 전 스탭이 함께 박수를 치며 체험 종료를 축하하도록 했습니다.</p>
+        <p class="report-p">단순히 선물을 받는 것이 아니라, "체험을 끝까지 완료했다", "인정받았다", "재미있는 마무리를 경험했다"는 감정이 남도록 만든 것입니다. 리워드는 단순 증정품이 아닌 "크런키 장학금"으로 소개하여 콘셉트를 마지막까지 유지했습니다.</p>
+        <p class="report-p">이후 "스트레스 타파는 되셨나요?"라는 질문으로 방문객 반응을 확인하고, "스트레스 받을 때 언제든지 저희 크런키 스트레스 타파 학원에 오셔서 강의 수강해 주세요"라는 멘트로 재방문 가능성까지 연결했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">공간 연출 및 비주얼 디렉팅</h3>
+        <p class="report-p">운영뿐 아니라 공간 연출과 브랜드 비주얼 노출 방식까지 직접 개입했습니다. 초기 세팅 단계에서 크런키 제품이 가장 잘 보이는 구조, 동선상 자연스럽게 시선이 흐르는 구조가 충분히 확보되지 않았다고 판단해 제품 진열 위치·시선 유도 포인트·체험 공간과 제품 노출의 관계를 디테일하게 재정리했습니다.</p>
+        <p class="report-p">특히 중앙 원장 테이블 포토존에는 세계관 캐릭터 '뚜지쌤'에 감정을 이입해 그녀가 사용할 법한 소품들과 글귀를 직접 채워 넣으며 세계관을 완성했습니다. 원샷 클래스에서는 방문객이 SNS 촬영 시 크런키 소품을 함께 활용할 수 있도록 소품을 직접 제작·배치해 바이럴 콘텐츠 생성 구조를 강화했습니다.</p>
+        <div class="highlight-box">이와 관련해 현장에서 대행사 측으로부터 "공간 디자이너나 비주얼 디렉터와 유사한 역할을 수행하고 있다"는 반응을 받았습니다.</div>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">인력 운영 시스템</h3>
+
+        <h4 class="report-h3">Psychological Safety 기반 팀 운영</h4>
+        <p class="report-p">모든 스탭에게 "님" 호칭을 일관되게 사용하며 존중을 표현했습니다. 잘 수행한 부분은 피드백 시간에 공개적으로 칭찬했고, 현장에서 나온 아이디어나 제안은 가볍게 넘기지 않고 실제로 반영했습니다.</p>
+        <p class="report-p">결과적으로 행사 후반부로 갈수록 스탭들이 먼저 현장 분위기를 살리고, 서로 돕고, 운영 포인트를 자발적으로 맞추는 흐름이 형성되었습니다. 단순히 팀 분위기가 좋았던 것을 넘어, 실제 운영 효율을 올리는 직접적인 요소로 작동했습니다.</p>
+
+        <h4 class="report-h3">순환 배치와 인력 평가</h4>
+        <p class="report-p">특정 인력이 특정 자리만 반복하면 피로도가 누적된다고 판단해 전체적으로 순환 구조를 적용했습니다. 다음 날 배치 포지션을 미리 고정 공개하지 않고 당일 공유하는 방식을 적용해 팀 전체의 긴장감과 집중도를 유지했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">고객사 피드백 및 결과</h3>
+        <div class="highlight-box">"향후에도 빅터와 다시 일하고 싶다"는 고객사의 재협업 의사가 확인되었습니다. 행사 기간 연장 요청 민원이 발생했으며, 이는 현장 만족도의 가장 직접적인 지표로 작동했습니다.</div>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">이 행사에서 드러난 역량</h3>
+        <div class="competency-list">
+          <span class="competency-tag">세계관 기반 운영 설계</span>
+          <span class="competency-tag">브랜드 경험 디렉팅</span>
+          <span class="competency-tag">공간 에너지 흐름 설계</span>
+          <span class="competency-tag">리워드 경험 연출</span>
+          <span class="competency-tag">비주얼 디렉팅</span>
+          <span class="competency-tag">팀 퍼포먼스 조율</span>
+          <span class="competency-tag">Psychological Safety 기반 팀빌딩</span>
+          <span class="competency-tag">브랜드 각인 구조 강화</span>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="accordion" id="accordion">
-
-    <div class="acc-item">
-      <button class="acc-trigger" aria-expanded="false" aria-controls="acc1">
-        <span class="acc-idx">01</span>
-        <span class="acc-name">콘서트 · 공연 · 페스티벌</span>
-        <span class="acc-icon"></span>
-      </button>
-      <div class="acc-panel" id="acc1">
-        <div class="acc-content">
-          <p class="acc-sub">국내 콘서트</p>
-          <p class="acc-text">나훈아, 김호중, 미스터트롯, 박효신, 정동원, 임창정, 이소라, 10CM, 윤하, 에릭남, FT아일랜드, 엔플라잉, 몬스타엑스 외 다수</p>
-          <p class="acc-sub">내한 공연</p>
-          <p class="acc-text">U2, 빌리 아일리시, 마룬5, 찰리 푸스, 더 체인스모커스, 한스 짐머, 션 멘데스, 케니 지, 에이셉 라키, 제이슨 므라즈, 알란 워커, 트로이 시반 외 다수</p>
-          <p class="acc-sub">뮤직 페스티벌</p>
-          <p class="acc-text">이슬라이브 페스티벌 (5년 연속), S2O 송크란 뮤직 페스티벌, 싸이 흠뻑쇼 전국 투어, 워터밤, 월드디제이페스티벌 외 다수</p>
-          <p class="acc-sub">지역축제 · 시즌 행사</p>
-          <p class="acc-text">서울라이트 광화문 2025, DDP 서울라이트, 행주문화제, 서울거리예술축제, DMZ영화제, 창경궁 야연 외 다수</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="acc-item">
-      <button class="acc-trigger" aria-expanded="false" aria-controls="acc2">
-        <span class="acc-idx">02</span>
-        <span class="acc-name">팬덤 · 시상식 · 엔터테인먼트</span>
-        <span class="acc-icon"></span>
-      </button>
-      <div class="acc-panel" id="acc2">
-        <div class="acc-content">
-          <p class="acc-sub">팬미팅 · 팬사인회 · 쇼케이스 (300회+)</p>
-          <p class="acc-text">세븐틴, 트와이스, 스트레이 키즈, TXT, ATEEZ, ENHYPEN, aespa, 케플러, SF9, AB6IX, CIX 외 다수</p>
-          <p class="acc-sub">시상식 · 어워즈</p>
-          <p class="acc-text">골든디스크어워즈 (5년), 백상예술대상 (5년), AAA 아시아아티스트어워즈, AFC Annual Awards Seoul 2023, 더팩트뮤직어워즈 외 다수</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="acc-item">
-      <button class="acc-trigger" aria-expanded="false" aria-controls="acc3">
-        <span class="acc-idx">03</span>
-        <span class="acc-name">브랜드 팝업 &amp; 체험 이벤트</span>
-        <span class="acc-icon"></span>
-      </button>
-      <div class="acc-panel" id="acc3">
-        <div class="acc-content">
-          <p class="acc-sub">브랜드 팝업</p>
-          <p class="acc-text">스크럽대디 'Sweet Scrub Shop', 크런키 스트레스 타파 학원, Refill'd 팝업, 대한민국 구석구석 우체국, NCT 성수 전시 외 다수</p>
-          <p class="acc-sub">체험형 이벤트 · 캠페인</p>
-          <p class="acc-text">군부대 야시장, 전통시장 살리기 프로모션, CGV 그린시네마, 서울 보드게임 페스타 외 다수</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="acc-item">
-      <button class="acc-trigger" aria-expanded="false" aria-controls="acc4">
-        <span class="acc-idx">04</span>
-        <span class="acc-name">기업 · 브랜드 행사</span>
-        <span class="acc-icon"></span>
-      </button>
-      <div class="acc-panel" id="acc4">
-        <div class="acc-content">
-          <p class="acc-text">현대자동차 패밀리데이, Volkswagen Media Day &amp; Forest, 신한은행 40주년, 삼성창업놀이터, 구글 클라우드 이노베이션 데이, 암웨이 National Convention, 크래프톤 사내행사, 멀츠 갈라디너, 미쉐린 코리아 NEW YEAR EVENT, 현대카드 다빈치모텔, Peggy Gou MOTZ 외 다수</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="acc-item">
-      <button class="acc-trigger" aria-expanded="false" aria-controls="acc5">
-        <span class="acc-idx">05</span>
-        <span class="acc-name">전시 · 박람회 · 엑스포</span>
-        <span class="acc-icon"></span>
-      </button>
-      <div class="acc-panel" id="acc5">
-        <div class="acc-content">
-          <p class="acc-text">코리아 나라장터 엑스포 2022–2026 (5년 연속 총괄), K-Display 2022–2024, ENVEX 2021–2024, 서울패션위크 트레이드쇼 2025–2026, AI EXPO KOREA 2023, KMF 2024, KOBA 2024, FIX 2024, Smart Life Week 2025, 서울팝콘 2025, G-BIO WEEK × AI CONNECT × G-FAIR 2025, 세계보안엑스포 2026 외 다수</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="acc-item">
-      <button class="acc-trigger" aria-expanded="false" aria-controls="acc6">
-        <span class="acc-idx">06</span>
-        <span class="acc-name">국제회의 · 포럼 · 컨퍼런스</span>
-        <span class="acc-icon"></span>
-      </button>
-      <div class="acc-panel" id="acc6">
-        <div class="acc-content">
-          <p class="acc-text">아시안 리더십 컨퍼런스 2022–2023, G20 글로벌 금융안정 컨퍼런스, CIMUSET Seoul 2023, Trans-Pacific Sustainability Dialogue 2023, 열린 혁신 정책플랫폼 글로벌 컨퍼런스 2021–2024, KDI 세미나, 전경련 컨퍼런스, IMPACT STARTUP DAY 2025 외 다수</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="acc-item">
-      <button class="acc-trigger" aria-expanded="false" aria-controls="acc7">
-        <span class="acc-idx">07</span>
-        <span class="acc-name">정부 · 공공 · VIP 의전</span>
-        <span class="acc-icon"></span>
-      </button>
-      <div class="acc-panel" id="acc7">
-        <div class="acc-content">
-          <p class="acc-text">청와대 국민의 품으로, 2024 과학·정보통신의 날 기념식, 재외공관장-기업인 상담회, 제31차 한일포럼, 한일중 비전 그룹, 경제개발 60주년 기념식, 외교부 주관 행사 다수, 반기문재단 컨퍼런스, 대통령 참석 국가 공식 기념식, 공항 VIP 의전 외 다수</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="acc-item">
-      <button class="acc-trigger" aria-expanded="false" aria-controls="acc8">
-        <span class="acc-idx">08</span>
-        <span class="acc-name">글로벌 · F&amp;B · 서비스 경험</span>
-        <span class="acc-icon"></span>
-      </button>
-      <div class="acc-panel" id="acc8">
-        <div class="acc-content">
-          <p class="acc-sub">F&amp;B · 글로벌</p>
-          <p class="acc-text">SkyCity Auckland "MASU by Nic Watt" 바텐더 (뉴질랜드 · 한국인 최초), MACHIBAR 바텐더 (일본 · 외국인 최초), Coco Cuba No 바텐더 (호주), Uncle Tom's Cabin · Coffee Bar K 청담 · 임페리얼팰리스 호텔 제과주방 · 이탈리아 대사관저 F&amp;B 서비스 운영</p>
-          <p class="acc-sub">글로벌 프로젝트</p>
-          <p class="acc-text">Adoption 2024 Tokyo Conference 현지파견 운영팀장, 일본 잡지사 한국 촬영 코디네이터, 일본인 대상 여행 코디네이션 다수</p>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /accordion -->
 </div>
-</section>
 
 
-<!-- ============================================================
-     08. PHILOSOPHY
-     ============================================================ -->
-<section class="philosophy section" id="philosophy">
-<div class="wrap">
+<!-- ══════════════════════════════════════
+     MODAL 04 — 리필드
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-refilld" onclick="closeOnOverlay(event, 'modal-refilld')">
+  <div class="modal-box">
+    <div class="modal-close">
+      <button class="close-btn" onclick="closeModal('modal-refilld')">✕ Close</button>
+    </div>
+    <div class="report-body">
+      <div class="report-header">
+        <p class="report-category">브랜드 팝업 · 뷰티 | Project Report</p>
+        <h2 class="report-title">리필드 팝업스토어</h2>
+        <p class="report-subtitle">현대백화점 천호점 | 2025.02.09 – 02.16</p>
+        <div class="report-meta">
+          <div class="meta-item"><span class="meta-key">브랜드</span><span class="meta-val">리필드 (AI 기반 맞춤 탈모케어)</span></div>
+          <div class="meta-item"><span class="meta-key">대행사</span><span class="meta-val">니쉬</span></div>
+          <div class="meta-item"><span class="meta-key">기간</span><span class="meta-val">2025년 2월 9일 – 2월 16일 (8일)</span></div>
+          <div class="meta-item"><span class="meta-key">장소</span><span class="meta-val">현대백화점 천호점 1층 리필드 팝업 부스</span></div>
+          <div class="meta-item"><span class="meta-key">역할</span><span class="meta-val">현장 총괄 + 상품 CS + 두피 진단 상담 전담</span></div>
+        </div>
+      </div>
 
-  <div class="sec-head u-reveal">
-    <p class="sec-label">Philosophy</p>
-    <h2 class="sec-title">철학</h2>
+      <div class="report-section">
+        <h3 class="report-h2">행사 개요</h3>
+        <p class="report-p">리필드는 독점 특허 성분인 사이토카인(NAADP & cADPR)을 기반으로 맞춤형 탈모케어 제품을 개발하는 브랜드입니다. AI 기반 두피 스캐너로 고객의 두피 상태(모발 두께, 유분도, 염증도, 연령대별 탈모율 등)를 진단하고, 그 결과에 따라 맞춤형 제품을 추천하는 서비스를 제공합니다.</p>
+        <p class="report-p">테이블 1개, 의자 2개의 극소 공간에서 AI 두피 진단(1회 5~10분 소요)·제품 상담·판매·매출 집계를 동시에 수행해야 하는 환경이었습니다. 사전 제품 교육이 거의 제공되지 않아 스스로 제품 지식을 습득해야 했으며, 대행사 담당자의 현장 상주가 최소화된 상태에서 빅터가 사실상 전 운영을 주도했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">일별 방문객 및 매출</h3>
+        <table class="report-table">
+          <thead><tr><th>날짜</th><th>방문객</th><th>매출</th></tr></thead>
+          <tbody>
+            <tr><td>2/10 (월)</td><td>64명</td><td>356,500원</td></tr>
+            <tr><td>2/11 (화)</td><td>71명</td><td>439,200원</td></tr>
+            <tr><td>2/12 (수)</td><td>69명</td><td>450,300원</td></tr>
+            <tr><td>2/13 (목)</td><td>81명</td><td>910,500원</td></tr>
+            <tr><td>2/14 (금)</td><td>91명</td><td>1,518,800원</td></tr>
+            <tr><td>2/15 (토)</td><td>102명</td><td>917,000원</td></tr>
+            <tr><td>2/16 (일)</td><td>101명</td><td><strong>2,025,800원</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">성과 요약</h3>
+        <table class="report-table">
+          <thead><tr><th>지표</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td>최종일 매출</td><td>2,025,800원 — 기간 내 최고 기록</td></tr>
+            <tr><td>지점장 반응</td><td>"정말 잘 운영되고 있다" 직접 발언 + 전 라인 구매</td></tr>
+            <tr><td>VIP 제안</td><td>지점장이 4층 VIP 고객 대상 체험 진행 제안</td></tr>
+            <tr><td>고객사 반응</td><td>"빅터를 믿고 맡긴다" 대표 발언 + 팀장·스탭 전원 제품 선물</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">핵심 운영 기여</h3>
+
+        <h4 class="report-h3">① 제품 전문성 자체 구축</h4>
+        <p class="report-p">탈모 제품에 대한 고객들의 의구심과 "거짓말"이라는 인식을 해소하기 위해, 사이토카인의 작용 원리, 두피 타입별 솔루션, 브랜드 개발 스토리까지 스스로 공부했습니다. 차분하고 구체적인 상담 방식으로 고객 신뢰를 확보했으며, 리필드 직원들이 단체 방문했을 때 "빅터의 설명이 우리 직원보다 더 낫다"는 피드백을 받았습니다.</p>
+
+        <h4 class="report-h3">② 대기 고객 접점 설계</h4>
+        <p class="report-p">1회 상담에 5~10분이 소요되어 대기 고객이 발생하는 구조였습니다. 개인 유튜브 프리미엄 계정으로 리필드 제품 설명 영상을 연속 재생하는 방식으로, 대기 중에도 고객이 자연스럽게 브랜드 정보를 접할 수 있도록 설계했습니다.</p>
+
+        <h4 class="report-h3">③ 가격 전략 제안</h4>
+        <p class="report-p">기존 행사 가격이 온라인 가격보다 높아 팝업의 매력이 부족하다고 판단해, 조심스럽게 가격 할인을 제안했습니다. 이 제안이 수용되어 판매 전략이 재정비되었고 매출 상승에 기여했습니다.</p>
+
+        <h4 class="report-h3">④ 백화점 내부 바이럴 구축</h4>
+        <p class="report-p">팝업 운영 중 천호현대백화점 직원들과 꾸준히 친밀한 관계를 유지했습니다. 직원들 사이에서 입소문이 퍼져 구입률이 점차 증가했습니다. 이후 지점장이 직접 부스를 체험하고 상담 내용을 청취한 뒤 "정말 잘 운영되고 있다"고 발언하며, 전 직원에게 매장 운영을 추천하고 전 라인 제품을 구입했습니다. 지점장은 리필드 대표에게 4층 VIP 고객 대상 체험 진행을 별도로 제안하기도 했습니다.</p>
+
+        <h4 class="report-h3">⑤ 스탭 보호 및 환경 조율</h4>
+        <p class="report-p">대행사 담당자가 상담 시간을 3분 이내로 단축할 것을 지시하고 다소 무례한 언행을 보이는 상황이 있었습니다. 두피 촬영과 AI 진단에는 최소 5~10분이 소요되는 현실적 한계를 설득하며, 스탭들이 불편 없이 업무를 지속할 수 있도록 뒤에서 지속적으로 격려하고 완충했습니다. 결과적으로 "믿고 맡겨주신다"는 담당자의 신뢰를 확보했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">상권 분석 — 현장 판단과 전략 재정비</h3>
+        <p class="report-p">리필드 측은 강남 신세계백화점 팝업에서 일 평균 100~200만원의 매출을 기록한 사례를 기준으로 천호점에서도 유사한 성과를 기대했습니다. 그러나 강남 신세계 아이코닉 공간의 하루 유동인구가 최소 10만 명에 달하는 것과 달리, 천호현대백화점은 강동구 지역 주민과 가족 단위 방문객 중심으로 구성되어 직접 비교가 어렵다고 판단했습니다.</p>
+        <p class="report-p">이를 바탕으로 단순 매출 목표 달성보다 철저한 고객 케어와 세트 판매 유도, 백화점 직원 입소문 공략으로 전략을 재정비했습니다. 구매로 이어지지 않은 고객에게는 공식 홈페이지 할인쿠폰과 후기 자료를 제공해 추후 구매로 유도하는 방안도 병행했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">운영 환경 이슈 및 대응</h3>
+        <p class="report-p">오픈 30분 전까지 가격표 프린트, 제품 진열, 관련 용품 구비가 미흡한 상태로 도착해 급하게 준비해야 했습니다. 결제 시스템이 수기 계산 방식이어서 매일 영수증을 확인하며 판매 제품과 가격을 일일이 기입해야 했습니다. 이에 대한 개선안으로 스프레드시트에 자동 계산 기능을 직접 적용해 최종 수량 입력 시 매출이 자동 산출되도록 개선했습니다.</p>
+      </div>
+
+      <div class="report-section">
+        <h3 class="report-h2">이 행사에서 드러난 역량</h3>
+        <div class="competency-list">
+          <span class="competency-tag">제품 전문성 자기 개발</span>
+          <span class="competency-tag">CS 상담 역량</span>
+          <span class="competency-tag">대기 고객 접점 설계</span>
+          <span class="competency-tag">가격 전략 제안</span>
+          <span class="competency-tag">상권 분석 및 전략 재정비</span>
+          <span class="competency-tag">백화점 내부 바이럴 구축</span>
+          <span class="competency-tag">스탭 보호 및 환경 조율</span>
+          <span class="competency-tag">운영 시스템 개선 (자동화 스프레드시트)</span>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="phil-body u-reveal">
-    <p class="phil-p">모든 것은 결국 사람으로 연결됩니다. 구조를 만드는 것도 사람이고, 그 구조를 움직이는 것도 사람이며, 결국 그 모든 것들은 사람을 위해 존재합니다. 저는 항상 사람을 중심에 두고 생각하며, 그 가치를 성과로 증명해 왔습니다.</p>
-    <p class="phil-p">어떤 곳에서 어떤 역할을 수행하든, 소홀히 했던 현장은 단 한 번도 없습니다. 셀 수 없이 많은 현장에서 진심으로 임했기에 저의 이력은 단순한 스펙의 나열이 아니라, 직접 부딪히며 축적한 단단한 내공이자 눈에 보이는 성과를 만들어내는 데이터가 되었습니다.</p>
-    <p class="phil-p">앞으로도 저의 기준은 변함없습니다. 사람을 중심으로 생각하고, 매 순간 진심을 담아 만족할 만한 성과로 보여드리겠습니다.</p>
-  </div>
-
-  <div class="phil-tags u-reveal">
-    <span class="phil-tag">사람</span>
-    <span class="phil-tag">신뢰</span>
-    <span class="phil-tag">경험</span>
-    <span class="phil-tag">성과</span>
-    <span class="phil-tag">안전</span>
-    <span class="phil-tag">협업</span>
-    <span class="phil-tag">즐거움</span>
-    <span class="phil-tag">존중</span>
-  </div>
-
 </div>
-</section>
 
-
-<!-- ============================================================
-     09. CONTACT
-     ============================================================ -->
-<section class="contact section" id="contact">
-<div class="wrap">
-
-  <div class="u-reveal">
-    <h2 class="contact-title">함께 일한다면</h2>
-    <p class="contact-body">
-      사람 사이의 신뢰를 바탕으로 매 순간을 즐기는 저의 에너지가<br>
-      브랜드의 내일을 만드는 힘이 될 수 있도록,<br>
-      함께 고민하고, 결과로 증명하는 파트너가 되겠습니다.
-    </p>
-  </div>
-
-  <!-- [수정 포인트] 이메일·전화번호 교체 -->
-  <div class="contact-info u-reveal">
-    <a href="mailto:your@email.com" class="contact-link">
-      <span class="contact-lbl">Email</span>
-      <span class="contact-val">your@email.com</span>
-    </a>
-    <a href="tel:+8210XXXXXXXX" class="contact-link">
-      <span class="contact-lbl">Phone</span>
-      <span class="contact-val">010-XXXX-XXXX</span>
-    </a>
-  </div>
-
-  <!-- [수정 포인트] 이력서 파일명 교체 -->
-  <div class="contact-cta u-reveal">
-    <a href="resume.pdf" download class="btn btn--gold">
-      <span>이력서 다운로드</span>
-      <span class="btn-arrow">↓</span>
-    </a>
-  </div>
-
-</div>
-</section>
-
-
-<!-- FOOTER -->
-<footer class="footer">
-  <p class="footer-copy">© 2026 여은혜 · Yeo Eunhye</p>
-  <p class="footer-top"><a href="#hero">Top ↑</a></p>
-</footer>
-
-
-<!-- ============================================================
-     JS — 인라인
-     ============================================================ -->
 <script>
-/* 1. Nav 스크롤 감지 */
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 60);
-}, {passive:true});
-
-/* 2. 모바일 메뉴 */
-const hamburger = document.getElementById('hamburger');
-const navMobile = document.getElementById('navMobile');
-
-hamburger.addEventListener('click', () => {
-  const open = hamburger.classList.toggle('open');
-  navMobile.classList.toggle('open', open);
-  document.body.style.overflow = open ? 'hidden' : '';
-});
-
-navMobile.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    navMobile.classList.remove('open');
-    document.body.style.overflow = '';
-  });
-});
-
-/* 3. 아코디언 */
-document.querySelectorAll('.acc-trigger').forEach(trigger => {
-  trigger.addEventListener('click', () => {
-    const isOpen = trigger.getAttribute('aria-expanded') === 'true';
-
-    // 모두 닫기
-    document.querySelectorAll('.acc-trigger').forEach(t => {
-      t.setAttribute('aria-expanded', 'false');
-      document.getElementById(t.getAttribute('aria-controls')).classList.remove('open');
-    });
-
-    // 현재 항목 토글
-    if (!isOpen) {
-      trigger.setAttribute('aria-expanded', 'true');
-      document.getElementById(trigger.getAttribute('aria-controls')).classList.add('open');
-    }
-  });
-});
-
-/* 4. 스크롤 등장 애니메이션 */
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('in');
-      observer.unobserve(e.target);
-    }
-  });
-}, {threshold: 0.1, rootMargin: '-30px 0px'});
-
-document.querySelectorAll('.u-reveal').forEach((el, i) => {
-  // 같은 그리드 안에서 순차 딜레이
-  const siblings = el.parentElement.querySelectorAll('.u-reveal');
-  if (siblings.length > 1) {
-    [...siblings].forEach((s, j) => { s.style.transitionDelay = j * 0.07 + 's'; });
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
-  observer.observe(el);
-});
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function closeOnOverlay(e, id) {
+    if (e.target === e.currentTarget) closeModal(id);
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(m => {
+        m.classList.remove('active');
+      });
+      document.body.style.overflow = '';
+    }
+  });
 </script>
-
 </body>
 </html>
