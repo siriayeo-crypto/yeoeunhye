@@ -104,6 +104,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .done-link-btn{flex-shrink:0;height:34px;padding:0 12px;border-radius:10px;background:var(--success);color:#fff;border:none;font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;text-decoration:none;}
 .done-link-btn:hover{opacity:.88;}
 .done-no-link{flex-shrink:0;font-size:11px;color:var(--hint);padding:0 8px;}
+.done-card-wrap{background:var(--success-bg);border:1px solid rgba(26,122,74,.2);border-radius:10px;margin-bottom:0;overflow:hidden;}
+.done-card-wrap .done-card{border:none;border-radius:0;background:transparent;}
+.done-card-wrap .memo-panel{background:transparent;}
+.done-card-wrap .memo-text{background:rgba(255,255,255,0.6);}
+.done-card-wrap .memo-private .memo-text{background:rgba(254,248,236,0.8);}
 
 /* SECTION DIVIDER */
 .section-label{font-size:11px;font-weight:500;color:var(--hint);letter-spacing:.05em;padding:4px 0 8px;display:flex;align-items:center;gap:8px;}
@@ -347,9 +352,9 @@ mark{background:rgba(43,79,219,.15);border-radius:2px;color:inherit;}
   <div class="topbar-right">
     <button class="text-btn t-sheets pc-only" onclick="openSheet('sheetsSheet')">📊 Sheets</button>
     <button class="text-btn pc-only" onclick="manualSync()">🔄 동기화</button>
-    <button class="text-btn pc-only" onclick="exportData()">⬇ 백업</button>
-    <label class="text-btn pc-only" style="cursor:pointer;">⬆ 복원<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
-    <button class="text-btn t-danger pc-only" onclick="resetData()">초기화</button>
+    <button class="text-btn pc-only" onclick="requirePw(exportData)">⬇ 백업</button>
+    <label class="text-btn pc-only" style="cursor:pointer;" onclick="return requirePwForLabel(event)">⬆ 복원<input type="file" accept=".json" id="restoreFileInput" style="display:none" onchange="importData(event)"></label>
+    <button class="text-btn t-danger pc-only" onclick="requirePw(resetData)">초기화</button>
     <button class="icon-btn" id="editBtn" onclick="tryToggleEdit()" title="편집">✏️</button>
     <button class="icon-btn mobile-only" onclick="openMenu()" title="메뉴">⋯</button>
   </div>
@@ -590,12 +595,12 @@ mark{background:rgba(43,79,219,.15);border-radius:2px;color:inherit;}
     <div class="sheet-handle"></div>
     <div class="sheet-title">메뉴</div>
     <div class="sheet-body" style="padding-top:8px;">
-      <button class="menu-item" onclick="closeSheet('menuSheet');openSheet('sheetsSheet')"><span class="mi-icon">📊</span>Google Sheets 연동</button>
+      <button class="menu-item" onclick="closeSheet('menuSheet');requirePw(()=>openSheet('sheetsSheet'))"><span class="mi-icon">📊</span>Google Sheets 연동</button>
       <button class="menu-item" onclick="closeSheet('menuSheet');manualSync()"><span class="mi-icon">🔄</span>지금 동기화</button>
-      <button class="menu-item" onclick="closeSheet('menuSheet');exportData()"><span class="mi-icon">⬇️</span>JSON 백업</button>
-      <label class="menu-item" style="cursor:pointer;"><span class="mi-icon">⬆️</span>백업 복원<input type="file" accept=".json" style="display:none" onchange="importData(event);closeSheet('menuSheet')"></label>
+      <button class="menu-item" onclick="closeSheet('menuSheet');requirePw(exportData)"><span class="mi-icon">⬇️</span>JSON 백업</button>
+      <button class="menu-item" onclick="closeSheet('menuSheet');requirePw(()=>document.getElementById('mobileRestoreInput').click())"><span class="mi-icon">⬆️</span>백업 복원</button><input type="file" accept=".json" id="mobileRestoreInput" style="display:none" onchange="importData(event)">
       <div class="menu-divider"></div>
-      <button class="menu-item danger" onclick="closeSheet('menuSheet');resetData()"><span class="mi-icon">🔄</span>기본 데이터 초기화</button>
+      <button class="menu-item danger" onclick="closeSheet('menuSheet');requirePw(resetData)"><span class="mi-icon">🔄</span>기본 데이터 초기화</button>
     </div>
   </div>
 </div>
@@ -727,11 +732,22 @@ function saveSheetsUrl(){
 }
 
 // ══ PASSWORD ══
+// 비밀번호 확인 후 콜백 실행
+let pwCallback = null;
+function requirePw(callback){
+  pwCallback = callback;
+  openPwSheet("check_callback");
+}
+function requirePwForLabel(e){
+  e.preventDefault();
+  requirePw(()=>document.getElementById('restoreFileInput').click());
+}
+
 function tryToggleEdit(){if(editMode){toggleEdit();return;}openPwSheet("check");}
 function openPwSheet(mode){
   pwMode=mode;pwBuffer="";
-  const titles={check:"🔒 편집 비밀번호",change_new:"🔑 새 비밀번호",change_confirm:"🔑 새 비밀번호 확인"};
-  const descs={check:"4자리 비밀번호를 입력하세요.",change_new:"새 4자리 비밀번호를 입력하세요.",change_confirm:"새 비밀번호를 다시 입력하세요."};
+  const titles={check:"🔒 편집 비밀번호",check_callback:"🔒 관리자 비밀번호",change_new:"🔑 새 비밀번호",change_confirm:"🔑 새 비밀번호 확인"};
+  const descs={check:"4자리 비밀번호를 입력하세요.",check_callback:"4자리 비밀번호를 입력하세요.",change_new:"새 4자리 비밀번호를 입력하세요.",change_confirm:"새 비밀번호를 다시 입력하세요."};
   document.getElementById("pwSheetTitle").textContent=titles[mode];
   document.getElementById("pwSheetDesc").textContent=descs[mode];
   document.getElementById("pwError").textContent="";
@@ -751,6 +767,11 @@ function checkPw(){
   if(pwMode==="check"){
     if(pwBuffer===PW){closePwSheet();toggleEdit();}
     else showPwError("비밀번호가 틀렸어요");
+  } else if(pwMode==="check_callback"){
+    if(pwBuffer===PW){
+      closePwSheet();
+      if(pwCallback){const cb=pwCallback;pwCallback=null;cb();}
+    } else showPwError("비밀번호가 틀렸어요");
   } else if(pwMode==="change_new"){
     newPwTemp=pwBuffer;pwBuffer="";openPwSheet("change_confirm");
   } else if(pwMode==="change_confirm"){
@@ -1079,21 +1100,37 @@ function renderGrid(){
 
   let doneSectionHtml="";
   if(allDoneIdeas.length){
-    const cards=allDoneIdeas.map(({idea,catTitle})=>{
+    const cards=allDoneIdeas.map(({idea,catTitle,catId},di)=>{
       const toolsHtml=(idea.tools||[]).map(toolBadgeHtml).join("");
       const linkBtn=idea.link
         ?`<a class="done-link-btn" href="${idea.link}" target="_blank">🔗 앱 열기</a>`
         :`<span class="done-no-link">링크 없음</span>`;
-      return `<div class="done-card">
-        <div class="done-card-info">
-          <div class="done-card-name">${hl(idea.name,searchQuery)}</div>
-          <div class="done-card-meta">
-            <span class="done-card-cat">${catTitle}</span>
-            ${idea.doneAt?`<span class="done-card-date">✅ ${idea.doneAt}</span>`:""}
-            ${toolsHtml}
+      const hasMemo=idea.memo||idea.privateMemo;
+      const memoKey="done-top-"+di;
+      const memoOpen=openMemos.has(memoKey);
+      const memoBtn=hasMemo
+        ?`<button class="memo-toggle${memoOpen?" open":""}" id="mt-${memoKey}" onclick="event.stopPropagation();toggleMemo('${memoKey}')" title="메모 보기">${memoOpen?"▴":"▾"}</button>`
+        :"";
+      const memoPanel=hasMemo?`<div class="memo-panel${memoOpen?" open":""}" id="mp-${memoKey}" style="padding:0 4px 4px;">
+        ${idea.memo?`<div class="memo-block"><div class="memo-label">📝 설명 메모</div><div class="memo-text">${hl(idea.memo,searchQuery)}</div></div>`:""}
+        ${idea.privateMemo?`<div class="memo-block memo-private"><div class="memo-label">🔒 개인 메모</div><div class="memo-text">${hl(idea.privateMemo,searchQuery)}</div></div>`:""}
+      </div>`:"";
+      return `<div class="done-card-wrap">
+        <div class="done-card">
+          <div class="done-card-info">
+            <div class="done-card-name">${hl(idea.name,searchQuery)}</div>
+            <div class="done-card-meta">
+              <span class="done-card-cat">${catTitle}</span>
+              ${idea.doneAt?`<span class="done-card-date">✅ ${idea.doneAt}</span>`:""}
+              ${toolsHtml}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            ${memoBtn}
+            ${linkBtn}
           </div>
         </div>
-        ${linkBtn}
+        ${memoPanel}
       </div>`;
     }).join("");
     doneSectionHtml=`<div class="done-section${doneSectionCollapsed?" collapsed":""}">
