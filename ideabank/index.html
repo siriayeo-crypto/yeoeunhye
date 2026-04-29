@@ -144,6 +144,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .memo-text{font-size:12px;color:var(--muted);line-height:1.6;white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:7px 10px;}
 .memo-private .memo-text{background:#FEF8EC;border-left:2px solid var(--warning);}
 
+/* IDEA WRAP */
+.idea-wrap{border-radius:10px;margin-bottom:2px;}
+.idea-wrap .idea-row{margin-bottom:0;}
+/* done idea - 진하게 표시 */
+.idea-wrap.done-idea .idea-main .name{font-weight:700;color:var(--text);}
+.idea-wrap.done-idea .idea-main{background:rgba(26,122,74,0.04);}
+.idea-wrap.done-idea .idea-main:hover{background:rgba(26,122,74,0.1);}
+
 /* DONE DIVIDER inside card */
 .done-divider{display:flex;align-items:center;gap:8px;padding:6px 10px 4px;margin-top:4px;}
 .done-divider-line{flex:1;height:1px;background:rgba(26,122,74,.25);}
@@ -385,7 +393,7 @@ mark{background:rgba(43,79,219,.15);border-radius:2px;color:inherit;}
 <!-- SUB TOOLBAR -->
 <div class="sub-toolbar">
   <button class="toggle-btn" id="showDoneBtn" onclick="toggleShowDone()">
-    ✅ 완료 항목 보기 <span class="done-count" id="doneCountBadge">0</span>
+    ✅ 상단 완성 앱 섹션 <span class="done-count" id="doneCountBadge">0</span>
   </button>
 </div>
 
@@ -770,8 +778,8 @@ function toggleEdit(){
 
 // ══ SHOW DONE ══
 function toggleShowDone(){
-  showDone=!showDone;
-  document.getElementById("showDoneBtn").classList.toggle("active",showDone);
+  doneSectionCollapsed=!doneSectionCollapsed;
+  document.getElementById("showDoneBtn").classList.toggle("active",!doneSectionCollapsed);
   render();
 }
 
@@ -1103,7 +1111,7 @@ function renderGrid(){
 
   const catCards=filtered.map(cat=>{
     const activeIdeas=cat.ideas.filter(i=>i.status!=="done");
-    const doneIdeas=showDone?cat.ideas.filter(i=>i.status==="done"):[];
+    const doneIdeas=cat.ideas.filter(i=>i.status==="done"); // 항상 카테고리 하단에 표시
     const doneCount=cat.ideas.filter(i=>i.status==="done").length;
     const isCollapsed=collapsedCats.has(cat.id)&&!editMode;
 
@@ -1126,31 +1134,38 @@ function renderGrid(){
       const memoBtn=hasMemo?`<button class="memo-toggle${memoOpen?" open":""}" id="mt-${key}" onclick="event.stopPropagation();toggleMemo('${key}')" title="메모 보기">${memoOpen?"▴":"▾"}</button>`:"";
 
       if(editMode){
-        return `<div class="idea-row${isDone?" done-idea":""}">
-          <div class="order-btns">
-            <button class="order-btn" onclick="moveIdea('${cat.id}',${realIdx},-1)">▲</button>
-            <button class="order-btn" onclick="moveIdea('${cat.id}',${realIdx},1)">▼</button>
+        return `<div class="idea-wrap${isDone?" done-idea":""}">
+          <div class="idea-row">
+            <div class="order-btns">
+              <button class="order-btn" onclick="moveIdea('${cat.id}',${realIdx},-1)">▲</button>
+              <button class="order-btn" onclick="moveIdea('${cat.id}',${realIdx},1)">▼</button>
+            </div>
+            <button class="idea-main" onclick="openIdeaEdit('${cat.id}',${realIdx})">
+              <span class="l">
+                <span class="name">${hl(idea.name,searchQuery)}</span>
+                <span class="badges">${statusBadge}${priBadge}${diffBadge}${toolsHtml}${dateStr}</span>
+              </span>
+              <span class="r">${memoBtn}</span>
+            </button>
+            <button class="del-idea" onclick="deleteIdea('${cat.id}',${realIdx})">🗑</button>
           </div>
-          <button class="idea-main" onclick="openIdeaEdit('${cat.id}',${realIdx})">
-            <span class="l">
-              <span class="name">${hl(idea.name,searchQuery)}</span>
-              <span class="badges">${statusBadge}${priBadge}${diffBadge}${toolsHtml}${dateStr}</span>
-            </span>
-          </button>
-          <button class="del-idea" onclick="deleteIdea('${cat.id}',${realIdx})">🗑</button>
-        </div>${memoPanel}`;
+          ${memoPanel}
+        </div>`;
       } else {
         const toolsArr=idea.tools||[];
         const toolsJson=JSON.stringify(toolsArr).replace(/"/g,"&quot;");
-        return `<div class="idea-row${isDone?" done-idea":""}">
-          <button class="idea-main" onclick="openPrompt('${idea.name.replace(/'/g,"\\'")}','${cat.id}',${JSON.stringify(toolsArr)})">
-            <span class="l">
-              <span class="name">${hl(idea.name,searchQuery)}</span>
-              <span class="badges">${statusBadge}${priBadge}${diffBadge}${toolsHtml}${dateStr}</span>
-            </span>
-            <span class="r">${memoBtn}<span style="font-size:11px;color:var(--hint);">↗</span></span>
-          </button>
-        </div>${memoPanel}`;
+        return `<div class="idea-wrap${isDone?" done-idea":""}">
+          <div class="idea-row">
+            <button class="idea-main" onclick="openPrompt('${idea.name.replace(/'/g,"\\'")}','${cat.id}',${JSON.stringify(toolsArr)})">
+              <span class="l">
+                <span class="name">${hl(idea.name,searchQuery)}</span>
+                <span class="badges">${statusBadge}${priBadge}${diffBadge}${toolsHtml}${dateStr}</span>
+              </span>
+              <span class="r">${memoBtn}<span style="font-size:11px;color:var(--hint);">↗</span></span>
+            </button>
+          </div>
+          ${memoPanel}
+        </div>`;
       }
     }
 
