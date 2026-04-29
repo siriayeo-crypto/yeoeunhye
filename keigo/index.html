@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="한일경어변환기">
+<title>한일경어변환기 — 日韓 敬語 Converter</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --paper-dark: #ede6d6;
+    --paper-mid: #e8e0cc;
+    --red: #c0392b;
+    --red-light: #e8d5d3;
+    --gold: #9a7d4a;
+    --gold-light: #e8dcc8;
+    --gray: #8a8078;
+    --gray-light: #d4cfc7;
+    --white: #fdfaf5;
+    --shadow: rgba(26,18,8,0.10);
+    --safe-top: env(safe-area-inset-top);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    font-family:'Noto Sans KR', sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+    padding-top:var(--safe-top);
+  }
+
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(154,125,74,0.07) 39px,rgba(154,125,74,0.07) 40px),
+      repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(154,125,74,0.04) 39px,rgba(154,125,74,0.04) 40px);
+    pointer-events:none; z-index:0;
+  }
+
+  .container {
+    max-width:600px; margin:0 auto;
+    padding:16px 16px 140px;
+    position:relative; z-index:1;
+  }
+
+  /* ───── 카운터 배너 ───── */
+  .counter-banner {
+    display:flex; align-items:center; justify-content:center;
+    gap:0; margin-bottom:14px;
+    background:var(--paper-dark);
+    border:1px solid var(--gold-light);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 2px 8px var(--shadow);
+  }
+  .counter-item {
+    flex:1; text-align:center; padding:10px 0;
+    cursor:pointer; user-select:none;
+    position:relative;
+  }
+  .counter-item:active { background:rgba(154,125,74,0.08); }
+  .counter-num {
+    font-family:'Shippori Mincho',serif;
+    font-size:22px; font-weight:800;
+    color:var(--gold); display:block; line-height:1;
+  }
+  .counter-label {
+    font-size:9px; letter-spacing:0.08em;
+    color:var(--gray); margin-top:3px; display:block;
+  }
+  .counter-divider { width:1px; height:40px; background:var(--gold-light); flex-shrink:0; }
+
+  /* 관리자 전용 초기화 버튼 (더블클릭 인증 후 표시) */
+  .counter-reset-wrap {
+    display:none; /* JS로 표시 */
+    padding:0 12px; align-items:center;
+  }
+  .counter-reset-wrap.visible { display:flex; }
+  .counter-reset {
+    background:var(--red-light); color:var(--red);
+    border:1px solid rgba(192,57,43,0.25);
+    font-size:10px; font-weight:700;
+    border-radius:6px; padding:5px 10px; cursor:pointer;
+    white-space:nowrap;
+  }
+  .counter-reset:active { background:var(--red); color:var(--white); }
+
+  /* ───── 관리자 PIN 오버레이 ───── */
+  .admin-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(26,18,8,0.65);
+    z-index:500; justify-content:center; align-items:center;
+  }
+  .admin-overlay.visible { display:flex; }
+  .admin-box {
+    background:var(--white); border-radius:16px;
+    padding:28px 22px 20px; width:272px; text-align:center;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
+  }
+  .admin-box h3 { font-family:'Shippori Mincho',serif; font-size:15px; color:var(--ink); margin-bottom:4px; }
+  .admin-box p  { font-size:11px; color:var(--gray); margin-bottom:18px; }
+  .pin-dots { display:flex; gap:10px; justify-content:center; margin-bottom:18px; }
+  .pin-dot {
+    width:13px; height:13px; border-radius:50%;
+    border:2px solid var(--gray-light); background:transparent;
+    transition:all 0.15s;
+  }
+  .pin-dot.filled { background:var(--red); border-color:var(--red); }
+  .pin-dot.error  { background:var(--red); border-color:var(--red); animation:shake 0.3s; }
+  .numpad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .num-btn {
+    padding:13px 0; font-family:'Shippori Mincho',serif;
+    font-size:18px; font-weight:700;
+    background:var(--paper); border:1.5px solid var(--gray-light);
+    border-radius:10px; cursor:pointer; transition:background 0.12s;
+  }
+  .num-btn:active { background:var(--red-light); border-color:var(--red); }
+  .admin-cancel { font-size:11px; color:var(--gray); background:none; border:none; cursor:pointer; text-decoration:underline; }
+
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}
+  }
+
+  /* ───── 헤더 ───── */
+  .header { text-align:center; margin-bottom:18px; padding-bottom:16px; border-bottom:2px solid var(--gold); }
+  .header-jp { font-family:'Shippori Mincho',serif; font-size:11px; letter-spacing:0.3em; color:var(--gold); margin-bottom:4px; }
+  .header h1 { font-family:'Shippori Mincho',serif; font-size:25px; font-weight:800; color:var(--ink); }
+  .header h1 span { color:var(--red); }
+
+  /* ───── 설정 트리거 ───── */
+  .settings-trigger { text-align:right; margin-bottom:8px; }
+  .btn-settings { background:none; border:none; color:var(--gray); font-size:11px; text-decoration:underline; cursor:pointer; }
+
+  /* ───── API 섹션 ───── */
+  .api-section {
+    background:var(--paper-dark); border:1px solid var(--gold-light);
+    display:none; padding:14px; margin-bottom:12px; border-radius:12px;
+  }
+  .api-row { display:flex; gap:7px; }
+  .api-input {
+    flex:1; font-size:14px; padding:11px;
+    border:1px solid var(--gray-light); border-radius:8px;
+    background:var(--white); outline:none; color:var(--ink);
+  }
+  .btn-api-save {
+    padding:0 13px; background:var(--gold); color:var(--white);
+    border:none; border-radius:8px; font-weight:700; font-size:12px;
+    cursor:pointer; white-space:nowrap;
+  }
+  .btn-api-del {
+    padding:0 11px; background:var(--red-light); color:var(--red);
+    border:1px solid rgba(192,57,43,0.2); border-radius:8px;
+    font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap;
+  }
+  .btn-api-del:active { background:var(--red); color:var(--white); }
+  .api-status { font-size:10px; color:var(--gray); margin-top:7px; }
+
+  /* ───── 카드 ───── */
+  .card {
+    background:var(--white); border:1px solid var(--gray-light);
+    border-radius:12px; padding:17px; margin-bottom:11px;
+    box-shadow:0 3px 12px var(--shadow);
+  }
+  .card-label {
+    font-size:10px; font-weight:700; letter-spacing:0.1em;
+    color:var(--gold); margin-bottom:10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .card-label::after { content:''; flex:1; height:1px; background:var(--gold-light); }
+
+  /* ───── 상황 선택 ───── */
+  .preset-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .preset-btn {
+    padding:10px 4px; border:1.5px solid var(--gray-light);
+    border-radius:8px; background:var(--white); cursor:pointer; text-align:center;
+  }
+  .preset-btn.active { border-color:var(--red); background:var(--red-light); }
+  .preset-btn .preset-icon { font-size:18px; display:block; margin-bottom:2px; }
+  .preset-name { font-size:10px; font-weight:600; color:var(--ink); }
+
+  /* ───── 입력 ───── */
+  .input-wrap { position:relative; }
+  textarea {
+    width:100%; min-height:110px; padding:12px;
+    border:1px solid var(--gray-light); border-radius:8px;
+    font-family:inherit; font-size:16px; line-height:1.6;
+    outline:none; resize:none; background:var(--white); color:var(--ink);
+    transition:border-color 0.2s;
+  }
+  textarea:focus { border-color:var(--gold); }
+  .lang-badge {
+    position:absolute; bottom:9px; right:9px; font-size:9px;
+    padding:2px 8px; border-radius:10px;
+    background:var(--gold-light); color:var(--gold); pointer-events:none;
+  }
+
+  /* ───── 레벨 ───── */
+  .level-row { display:flex; gap:4px; }
+  .level-btn {
+    flex:1; padding:8px 2px; border:1.5px solid var(--gray-light);
+    border-radius:8px; background:var(--white); cursor:pointer; text-align:center;
+  }
+  .level-btn.active { border-color:var(--red); background:var(--red-light); }
+  .level-num { font-family:'Shippori Mincho',serif; font-size:16px; font-weight:700; display:block; color:var(--gray); }
+  .level-btn.active .level-num { color:var(--red); }
+  .level-name { font-size:9px; color:var(--gray); }
+
+  /* ───── 로딩 ───── */
+  .loading {
+    display:none; text-align:center; padding:18px;
+    color:var(--red); font-weight:600; font-size:13px;
+  }
+  .loading.visible { display:block; }
+  .loading::after {
+    content:''; display:inline-block; width:14px; height:14px;
+    border:2px solid var(--red-light); border-top-color:var(--red);
+    border-radius:50%; animation:spin 0.7s linear infinite;
+    margin-left:8px; vertical-align:middle;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ───── 결과 카드 ───── */
+  .result-card { display:none; margin-top:10px; }
+  .result-card.visible { display:block; animation:slideUp 0.3s ease-out; }
+
+  .result-header {
+    display:flex; justify-content:space-between; margin-bottom:11px;
+    align-items:center; flex-wrap:wrap; gap:6px;
+  }
+  .action-group { display:flex; gap:6px; }
+  .action-btn {
+    padding:6px 12px; font-size:11px; border:none; border-radius:6px;
+    font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;
+    transition:opacity 0.15s;
+  }
+  .btn-copy  { background:var(--gold-light); color:var(--gold); }
+  .btn-speak { background:var(--ink); color:var(--white); }
+  .btn-stop  { background:var(--red); color:var(--white); display:none; }
+
+  /* ───── TTS 컨트롤 ───── */
+  .tts-controls {
+    margin-bottom:0; padding:10px 12px;
+    background:var(--paper); border-radius:8px 8px 0 0;
+    border:1px solid var(--gray-light); border-bottom:none;
+  }
+  .tts-speed-row { display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+  .tts-label { font-size:11px; font-weight:700; color:var(--gray); white-space:nowrap; }
+  .tts-hint  { font-size:9px; color:var(--gray); margin-left:auto; opacity:0.7; }
+  .speed-slider {
+    flex:1; height:4px; background:var(--gray-light);
+    border-radius:2px; appearance:none; outline:none; cursor:pointer;
+  }
+  .speed-slider::-webkit-slider-thumb {
+    appearance:none; width:16px; height:16px;
+    background:var(--red); border-radius:50%; cursor:pointer;
+  }
+  .progress-wrap {
+    height:5px; background:var(--gray-light); border-radius:3px;
+    overflow:hidden; margin-bottom:4px;
+  }
+  .progress-bar {
+    height:100%; background:linear-gradient(90deg,var(--red),var(--gold));
+    border-radius:3px; width:0%; transition:width 0.3s linear;
+  }
+  .progress-label { font-size:9px; color:var(--gray); text-align:right; }
+
+  /* ───── 결과 텍스트 (클릭 단위) ───── */
+  .result-text {
+    font-family:'Noto Serif JP',serif; font-size:18px; line-height:2;
+    padding:15px; background:var(--paper-dark);
+    border-left:4px solid var(--red);
+    border:1px solid var(--gray-light); border-top:none;
+    word-break:break-all; margin-bottom:0;
+  }
+  .word-span {
+    display:inline; cursor:pointer; border-radius:3px;
+    padding:1px 1px; transition:background 0.12s;
+  }
+  .word-span:hover { background:rgba(192,57,43,0.12); }
+  .word-span.speaking { background:var(--red); color:var(--white); }
+
+  /* ───── 발음 블록 ───── */
+  .pronun-block {
+    border:1px solid var(--gray-light); border-top:none;
+    border-radius:0 0 8px 8px;
+    background:var(--paper); padding:10px 15px 12px;
+    margin-bottom:10px;
+  }
+  .pronun-row { margin-bottom:7px; }
+  .pronun-row:last-child { margin-bottom:0; }
+  .pronun-lbl {
+    font-size:9px; font-weight:700; letter-spacing:0.12em;
+    color:var(--gold); margin-bottom:2px;
+  }
+  .pronun-val { font-size:13px; color:var(--gray); line-height:1.7; }
+  .pronun-val.jp { font-family:'Noto Serif JP',serif; font-size:14px; color:var(--ink); }
+
+  /* 결과 텍스트에 왼쪽 테두리 강조 */
+  .result-text { border-left:4px solid var(--red) !important; }
+
+  .points-text {
+    font-size:12px; line-height:1.7; color:var(--gray);
+    border-top:1px dashed var(--gold-light); padding-top:11px; margin-top:10px;
+  }
+
+  /* ───── 에러 메시지 ───── */
+  .error-msg {
+    display:none; margin-top:8px; padding:10px 13px;
+    background:var(--red-light); border:1px solid rgba(192,57,43,0.2);
+    border-radius:8px; font-size:12px; color:var(--red); line-height:1.5;
+  }
+  .error-msg.visible { display:block; }
+
+  /* ───── 변환 버튼 (키보드 위치 동적 조정) ───── */
+  .btn-convert {
+    position:fixed; bottom:20px; left:16px; right:16px;
+    padding:16px; background:var(--ink); color:var(--white);
+    border:none; border-radius:12px;
+    font-family:'Shippori Mincho',serif; font-size:17px; font-weight:700;
+    letter-spacing:0.1em; box-shadow:0 8px 25px rgba(0,0,0,0.28);
+    z-index:50; cursor:pointer; transition:background 0.2s, transform 0.1s;
+    max-width:568px; margin:0 auto;
+  }
+  .btn-convert:active { transform:scale(0.98); background:var(--red); }
+  .btn-convert:disabled { background:var(--gray); cursor:not-allowed; transform:none; }
+
+  /* ───── 토스트 ───── */
+  .toast {
+    position:fixed; bottom:90px; left:50%;
+    transform:translateX(-50%) translateY(14px);
+    background:rgba(26,18,8,0.9); color:var(--white);
+    font-size:12px; font-weight:600;
+    padding:8px 20px; border-radius:20px; opacity:0;
+    transition:all 0.28s ease; z-index:400;
+    white-space:nowrap; pointer-events:none;
+    backdrop-filter:blur(4px);
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @keyframes slideUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- 카운터 배너 -->
+  <div class="counter-banner">
+    <div class="counter-item" id="todayWrap" ondblclick="openAdminOverlay()">
+      <span class="counter-num" id="todayCount">0</span>
+      <span class="counter-label">오늘 번역</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-item" id="totalWrap" ondblclick="openAdminOverlay()">
+      <span class="counter-num" id="totalCount">0</span>
+      <span class="counter-label">누적 번역</span>
+    </div>
+    <!-- 인증 후에만 노출 -->
+    <div class="counter-divider" id="resetDivider" style="display:none;"></div>
+    <div class="counter-reset-wrap" id="resetWrap">
+      <button class="counter-reset" onclick="doResetCounter()">초기화</button>
+    </div>
+  </div>
+
+  <!-- 관리자 PIN 오버레이 -->
+  <div class="admin-overlay" id="adminOverlay">
+    <div class="admin-box">
+      <h3>관리자 인증</h3>
+      <p>4자리 비밀번호를 입력하세요</p>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" id="dot0"></div>
+        <div class="pin-dot" id="dot1"></div>
+        <div class="pin-dot" id="dot2"></div>
+        <div class="pin-dot" id="dot3"></div>
+      </div>
+      <div class="numpad">
+        <button class="num-btn" onclick="pinInput('1')">1</button>
+        <button class="num-btn" onclick="pinInput('2')">2</button>
+        <button class="num-btn" onclick="pinInput('3')">3</button>
+        <button class="num-btn" onclick="pinInput('4')">4</button>
+        <button class="num-btn" onclick="pinInput('5')">5</button>
+        <button class="num-btn" onclick="pinInput('6')">6</button>
+        <button class="num-btn" onclick="pinInput('7')">7</button>
+        <button class="num-btn" onclick="pinInput('8')">8</button>
+        <button class="num-btn" onclick="pinInput('9')">9</button>
+        <button class="num-btn" style="font-size:12px;" onclick="pinClear()">지움</button>
+        <button class="num-btn" onclick="pinInput('0')">0</button>
+        <button class="num-btn" style="font-size:12px;" onclick="closeAdminOverlay()">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 헤더 -->
+  <header class="header">
+    <div class="header-jp">敬語 · 翻訳 · 한일경어변환기</div>
+    <h1>한일 경어 <span>변환기</span></h1>
+  </header>
+
+  <div class="settings-trigger">
+    <button class="btn-settings" onclick="toggleApiSection()">⚙️ API Key 설정</button>
+  </div>
+
+  <!-- API 키 -->
+  <div class="api-section" id="apiSection">
+    <div class="card-label">🔑 OpenRouter API Key</div>
+    <div class="api-row">
+      <input type="password" id="apiKeyInput" class="api-input" placeholder="sk-or-v1-...">
+      <button class="btn-api-save" onclick="saveApiKey()">저장</button>
+      <button class="btn-api-del"  onclick="deleteApiKey()">삭제</button>
+    </div>
+    <div class="api-status" id="apiStatus"></div>
+  </div>
+
+  <!-- 상황 선택 -->
+  <div class="card">
+    <div class="card-label">상황 선택</div>
+    <div class="preset-grid">
+      <button class="preset-btn active" onclick="selectPreset(this,'대면 업무상 대화')">
+        <span class="preset-icon">🤝</span><span class="preset-name">대면</span>
+      </button>
+      <button class="preset-btn" onclick="selectPreset(this,'친밀한 메신저/채팅')">
+        <span class="preset-icon">💬</span><span class="preset-name">메시지</span>
+      </button>
+      <button class="preset-btn" onclick="selectPreset(this,'비즈니스 이메일')">
+        <span class="preset-icon">✉️</span><span class="preset-name">이메일</span>
+      </button>
+      <button class="preset-btn" onclick="selectPreset(this,'공문서/발표문')">
+        <span class="preset-icon">📜</span><span class="preset-name">공문서</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 내용 입력 -->
+  <div class="card">
+    <div class="card-label">내용 입력</div>
+    <div class="input-wrap">
+      <textarea id="inputText"
+        placeholder="변환할 문장을 입력하세요 (한국어 또는 일본어)..."
+        oninput="handleInput(this.value)"></textarea>
+      <span class="lang-badge" id="langBadge">언어 감지</span>
+    </div>
+  </div>
+
+  <!-- 강도 선택 -->
+  <div class="card">
+    <div class="card-label">변환 강도 (Level 1–5)</div>
+    <div class="level-row">
+      <button class="level-btn" onclick="selectLevel(this,1,'반말 (Casual)')">
+        <span class="level-num">1</span><span class="level-name">반말</span>
+      </button>
+      <button class="level-btn" onclick="selectLevel(this,2,'정중 소 (Standard Politeness)')">
+        <span class="level-num">2</span><span class="level-name">정중(소)</span>
+      </button>
+      <button class="level-btn active" onclick="selectLevel(this,3,'정중 중 (Business Standard)')">
+        <span class="level-num">3</span><span class="level-name">정중(중)</span>
+      </button>
+      <button class="level-btn" onclick="selectLevel(this,4,'존경/겸양 (Professional Keigo)')">
+        <span class="level-num">4</span><span class="level-name">존경</span>
+      </button>
+      <button class="level-btn" onclick="selectLevel(this,5,'극존칭 (Maximum Formality)')">
+        <span class="level-num">5</span><span class="level-name">극존칭</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">AI가 문장을 다듬고 있습니다</div>
+
+  <!-- 에러 메시지 -->
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- 결과 카드 -->
+  <div class="card result-card" id="resultCard">
+    <div class="result-header">
+      <span id="resultInfo" style="font-size:11px;font-weight:700;color:var(--red);"></span>
+      <div class="action-group">
+        <button class="action-btn btn-speak" id="speakBtn" onclick="speakResult()">▶ 재생</button>
+        <button class="action-btn btn-stop"  id="stopBtn"  onclick="stopSpeak()">■ 중지</button>
+        <button class="action-btn btn-copy"  onclick="copyResult()">복사</button>
+      </div>
+    </div>
+
+    <!-- 속도 + 진행바 -->
+    <div class="tts-controls">
+      <div class="tts-speed-row">
+        <span class="tts-label">속도: <b id="speedVal">1.0</b>x</span>
+        <input type="range" class="speed-slider" id="speedSlider"
+               min="0.5" max="2.0" step="0.1" value="1.0"
+               oninput="updateSpeedDisplay(this.value)">
+        <span class="tts-hint" id="ttsHint"></span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-label" id="progressLabel">재생 대기 중</div>
+    </div>
+
+    <!-- 번역 결과 -->
+    <div class="result-text" id="resultText"></div>
+
+    <!-- 발음 블록 (조건부 노출) -->
+    <div class="pronun-block" id="pronunBlock" style="display:none;">
+      <div class="pronun-row" id="rowHiragana" style="display:none;">
+        <div class="pronun-lbl">히라가나 읽기</div>
+        <div class="pronun-val jp" id="valHiragana"></div>
+      </div>
+      <div class="pronun-row" id="rowKoPronun" style="display:none;">
+        <div class="pronun-lbl">한국어 발음</div>
+        <div class="pronun-val" id="valKoPronun"></div>
+      </div>
+      <div class="pronun-row" id="rowKatakana" style="display:none;">
+        <div class="pronun-lbl">가타카나 발음</div>
+        <div class="pronun-val jp" id="valKatakana"></div>
+      </div>
+    </div>
+
+    <div class="points-text" id="pointsText"></div>
+  </div>
+
+</div><!-- /container -->
+
+<button class="btn-convert" id="convertBtn" onclick="performConversion()">変換 · 변환하기</button>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════
+// 상태
+// ══════════════════════════════════════════
+let apiKey            = localStorage.getItem('openrouter_api_key') || '';
+let selectedPreset    = '대면 업무상 대화';
+let selectedLevel     = 3;
+let selectedLevelName = '정중 중 (Business Standard)';
+let detectedLang      = 'ko';   // 입력 언어
+let resultLang        = 'ja';   // 출력 언어 — TTS/발음 기준
+let wordTokens        = [];
+let progressTimer     = null;
+let adminUnlocked     = false;  // 세션 중 인증 여부
+
+const ADMIN_PIN = '5555';
+let   pinBuffer = '';
+
+// ══════════════════════════════════════════
+// 초기화
+// ══════════════════════════════════════════
+window.addEventListener('load', () => {
+  loadCounters();
+  updateApiStatus();
+  // 키보드 올라올 때 변환 버튼 위치 조정
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', adjustConvertBtn);
+  }
+});
+
+function adjustConvertBtn() {
+  const vv  = window.visualViewport;
+  const btn = document.getElementById('convertBtn');
+  if (!vv) return;
+  const offsetBottom = window.innerHeight - vv.height - vv.offsetTop;
+  btn.style.bottom = Math.max(20, offsetBottom + 10) + 'px';
+}
+
+// ══════════════════════════════════════════
+// 카운터
+// ══════════════════════════════════════════
+function loadCounters() {
+  const today     = new Date().toDateString();
+  const savedDate = localStorage.getItem('counter_date');
+  if (savedDate !== today) {
+    localStorage.setItem('counter_date', today);
+    localStorage.setItem('today_count', '0');
+  }
+  document.getElementById('todayCount').textContent = localStorage.getItem('today_count') || '0';
+  document.getElementById('totalCount').textContent = localStorage.getItem('total_count')  || '0';
+}
+
+function incrementCounter() {
+  const today = Number(localStorage.getItem('today_count') || 0) + 1;
+  const total  = Number(localStorage.getItem('total_count')  || 0) + 1;
+  localStorage.setItem('today_count', String(today));
+  localStorage.setItem('total_count',  String(total));
+  document.getElementById('todayCount').textContent = today;
+  document.getElementById('totalCount').textContent = total;
+}
+
+function doResetCounter() {
+  if (!confirm('카운터를 초기화할까요?')) return;
+  localStorage.setItem('today_count', '0');
+  localStorage.setItem('total_count',  '0');
+  localStorage.setItem('counter_date', new Date().toDateString());
+  document.getElementById('todayCount').textContent = '0';
+  document.getElementById('totalCount').textContent = '0';
+  showToast('카운터가 초기화되었습니다');
+  // 초기화 후 잠금
+  adminUnlocked = false;
+  document.getElementById('resetWrap').classList.remove('visible');
+  document.getElementById('resetDivider').style.display = 'none';
+}
+
+// ══════════════════════════════════════════
+// 관리자 PIN
+// ══════════════════════════════════════════
+function openAdminOverlay() {
+  if (adminUnlocked) return; // 이미 인증됨 → 바로 초기화 버튼 노출 상태
+  pinBuffer = '';
+  updatePinDots(false);
+  document.getElementById('adminOverlay').classList.add('visible');
+}
+
+function closeAdminOverlay() {
+  document.getElementById('adminOverlay').classList.remove('visible');
+  pinBuffer = '';
+  updatePinDots(false);
+}
+
+function pinInput(digit) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updatePinDots(false);
+  if (pinBuffer.length === 4) {
+    setTimeout(() => {
+      if (pinBuffer === ADMIN_PIN) {
+        closeAdminOverlay();
+        adminUnlocked = true;
+        document.getElementById('resetWrap').classList.add('visible');
+        document.getElementById('resetDivider').style.display = 'block';
+        showToast('관리자 모드 활성화');
+      } else {
+        updatePinDots(true); // 오류 표시
+        setTimeout(() => {
+          pinBuffer = '';
+          updatePinDots(false);
+        }, 500);
+        showToast('비밀번호가 틀렸습니다');
+      }
+    }, 150);
+  }
+}
+
+function pinClear() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots(false);
+}
+
+function updatePinDots(isError) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.remove('filled', 'error');
+    if (i < pinBuffer.length) dot.classList.add(isError ? 'error' : 'filled');
+  }
+}
+
+// ══════════════════════════════════════════
+// API 키
+// ══════════════════════════════════════════
+function toggleApiSection() {
+  const s = document.getElementById('apiSection');
+  s.style.display = (s.style.display === 'none' || s.style.display === '') ? 'block' : 'none';
+}
+
+function updateApiStatus() {
+  const el = document.getElementById('apiStatus');
+  if (apiKey) {
+    el.textContent = '✓ API 키가 등록되어 있습니다';
+    el.style.color = 'var(--gold)';
+    document.getElementById('apiKeyInput').value = apiKey;
+  } else {
+    el.textContent = '⚠ API 키를 등록하면 번역 기능이 활성화됩니다';
+    el.style.color = 'var(--red)';
+  }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val) { showToast('키를 입력해주세요'); return; }
+  apiKey = val;
+  localStorage.setItem('openrouter_api_key', apiKey);
+  updateApiStatus();
+  showToast('API 키가 저장되었습니다 ✓');
+  document.getElementById('apiSection').style.display = 'none';
+}
+
+function deleteApiKey() {
+  if (!apiKey) { showToast('등록된 키가 없습니다'); return; }
+  if (!confirm('API 키를 삭제할까요?')) return;
+  apiKey = '';
+  localStorage.removeItem('openrouter_api_key');
+  document.getElementById('apiKeyInput').value = '';
+  updateApiStatus();
+  showToast('API 키가 삭제되었습니다');
+}
+
+// ══════════════════════════════════════════
+// 선택
+// ══════════════════════════════════════════
+function selectPreset(el, val) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedPreset = val;
+}
+
+function selectLevel(el, val, name) {
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedLevel     = val;
+  selectedLevelName = name;
+}
+
+function handleInput(val) {
+  const isJp = /[\u3040-\u30ff\u4e00-\u9fff]/.test(val);
+  detectedLang = isJp ? 'ja' : 'ko';
+  document.getElementById('langBadge').textContent =
+    isJp ? '🇯🇵 일본어 감지' : '🇰🇷 한국어 감지';
+}
+
+function updateSpeedDisplay(val) {
+  document.getElementById('speedVal').textContent = parseFloat(val).toFixed(1);
+}
+
+// ══════════════════════════════════════════
+// 변환 실행
+// ══════════════════════════════════════════
+async function performConversion() {
+  const text = document.getElementById('inputText').value.trim();
+  if (!text) { showToast('변환할 문장을 입력하세요'); return; }
+
+  if (!apiKey) {
+    showToast('먼저 API 키를 등록해주세요');
+    document.getElementById('apiSection').style.display = 'block';
+    return;
+  }
+
+  const loader     = document.getElementById('loading');
+  const resultCard = document.getElementById('resultCard');
+  const errorMsg   = document.getElementById('errorMsg');
+  const btn        = document.getElementById('convertBtn');
+
+  // UI 초기화
+  loader.classList.add('visible');
+  resultCard.classList.remove('visible');
+  errorMsg.classList.remove('visible');
+  btn.disabled = true;
+  stopSpeak();
+
+  // ★ 결과 언어를 이 시점에서 확정하고 절대 바꾸지 않음
+  resultLang = (detectedLang === 'ko') ? 'ja' : 'ko';
+  const capturedResultLang = resultLang; // 클로저 안전 캡처
+
+  const outputLang = capturedResultLang === 'ja' ? '일본어' : '한국어';
+
+  let scenarioGuide = '';
+  if (selectedPreset.includes('대면'))   scenarioGuide = '대화체(구어체) 위주로 자연스럽게 구성하세요.';
+  if (selectedPreset.includes('메신저')) scenarioGuide = '간결하면서도 상황에 맞는 격식을 갖추세요.';
+  if (selectedPreset.includes('이메일')) scenarioGuide = '격식 있는 문어체 표현과 비즈니스 관용구를 사용하세요.';
+  if (selectedPreset.includes('공문서')) scenarioGuide = '매우 정중하고 공식적인 서술형 문장으로 구성하세요.';
+
+  // 방향별 발음 지시 (명확하게 분리)
+  const pronunSection = capturedResultLang === 'ja'
+    ? `[히라가나] 번역 결과를 히라가나로만 표기 (한자 없이, 특수문자 금지. 예: よろしくおねがいします)
+[한국어발음] 번역 결과를 한국어 발음으로 표기 (한글만 사용. 예: 요로시쿠 오네가이시마스)`
+    : `[가타카나] 한국어 번역 결과의 발음을 일본어 가타카나 문자로만 표기하세요. 가타카나(ア行~ン)만 사용. 한국어·한자·히라가나 절대 금지. 예시: 잘 부탁드립니다 → チャル プタクトゥリムニダ / 안녕하세요 → アンニョンハセヨ`;
+
+  const prompt = `당신은 한국어와 일본어 경어 전문가입니다. 아래 지시를 정확히 따르세요.
+
+[번역 조건]
+- 상황: ${selectedPreset} / ${scenarioGuide}
+- 경어 강도: Level ${selectedLevel} (${selectedLevelName})
+  Lv1=반말(タメ口) Lv2=데스마스체 Lv3=표준비즈니스 Lv4=존경/겸양어 Lv5=극존칭
+
+[입력]
+"${text}"
+
+[출력 언어]
+${outputLang}로만 번역하세요.
+
+[응답 형식 — 반드시 이 태그와 순서 그대로, 각 줄에 하나씩]
+[번역결과] (번역된 문장 한 줄, 특수문자·마크다운 금지)
+${pronunSection}
+[변환포인트] (핵심 어휘/어미 특징 한 줄)`;
+
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.0-flash-001',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.25
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (!data.choices?.[0]?.message?.content) throw new Error('빈 응답');
+
+    const raw = data.choices[0].message.content;
+
+    // ── 파싱 (capturedResultLang 기준, 절대 교차 안 됨) ──
+    const getTag = (tag, next) => {
+      const nextTags = next ? next.map(t => `\\[${t}\\]`).join('|') : '';
+      const pattern  = nextTags
+        ? new RegExp(`\\[${tag}\\]\\s*([\\s\\S]*?)(?=${nextTags}|$)`)
+        : new RegExp(`\\[${tag}\\]\\s*([\\s\\S]*?)$`);
+      const m = raw.match(pattern);
+      return m ? m[1].trim() : '';
+    };
+
+    const finalResult = getTag('번역결과', capturedResultLang === 'ja'
+      ? ['히라가나','한국어발음','변환포인트']
+      : ['가타카나','변환포인트']);
+
+    if (!finalResult) throw new Error('번역 결과를 파싱할 수 없습니다');
+
+    // 발음 파싱 — 방향별로 완전히 분리
+    let hiragana = '', koPronun = '', katakana = '';
+    if (capturedResultLang === 'ja') {
+      hiragana = getTag('히라가나', ['한국어발음','변환포인트']);
+      koPronun = getTag('한국어발음', ['변환포인트']);
+    } else {
+      const rawKata = getTag('가타카나', ['변환포인트']);
+      // 가타카나 문자(ァ-ン)가 실제로 포함돼 있어야 유효
+      // 한국어(가-힣)만 있으면 AI 오류 응답이므로 표시 안 함
+      const hasKatakana = /[゠-ヿ]/.test(rawKata);
+      const hasHangul   = /[가-힣]/.test(rawKata);
+      katakana = (hasKatakana && !hasHangul) ? rawKata : '';
+    }
+    const points = getTag('변환포인트', []);
+
+    // ── DOM 업데이트 ──
+    renderWordSpans(finalResult, capturedResultLang);
+    renderPronun(capturedResultLang, hiragana, koPronun, katakana);
+
+    document.getElementById('pointsText').textContent = points || '';
+    document.getElementById('resultInfo').textContent =
+      `${selectedPreset} | Lv.${selectedLevel} | ${detectedLang === 'ko' ? '한→일' : '일→한'}`;
+
+    setProgress(0, '단어(묶음)를 클릭하면 그 지점부터 재생');
+    resultCard.classList.add('visible');
+    setTimeout(() => resultCard.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+
+    incrementCounter();
+
+  } catch (err) {
+    console.error(err);
+    const msg = err.message.includes('401')
+      ? 'API 키가 올바르지 않습니다. 키를 확인해주세요.'
+      : err.message.includes('429')
+      ? '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'
+      : `오류: ${err.message}`;
+    showError(msg);
+    if (err.message.includes('401')) {
+      document.getElementById('apiSection').style.display = 'block';
+    }
+  } finally {
+    loader.classList.remove('visible');
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════
+// 발음 블록 렌더 (방향별 완전 분리)
+// ══════════════════════════════════════════
+function renderPronun(lang, hiragana, koPronun, katakana) {
+  // 전체 초기화
+  ['rowHiragana','rowKoPronun','rowKatakana'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  ['valHiragana','valKoPronun','valKatakana'].forEach(id => {
+    document.getElementById(id).textContent = '';
+  });
+
+  const block = document.getElementById('pronunBlock');
+  let show = false;
+
+  if (lang === 'ja') {
+    if (hiragana) {
+      document.getElementById('valHiragana').textContent = hiragana;
+      document.getElementById('rowHiragana').style.display = 'block';
+      show = true;
+    }
+    if (koPronun) {
+      document.getElementById('valKoPronun').textContent = koPronun;
+      document.getElementById('rowKoPronun').style.display = 'block';
+      show = true;
+    }
+  } else {
+    // 일→한: 가타카나만
+    if (katakana) {
+      document.getElementById('valKatakana').textContent = katakana;
+      document.getElementById('rowKatakana').style.display = 'block';
+      show = true;
+    }
+  }
+
+  block.style.display = show ? 'block' : 'none';
+}
+
+// ══════════════════════════════════════════
+// 단어 span 렌더링
+// ══════════════════════════════════════════
+function renderWordSpans(text, lang) {
+  const div = document.getElementById('resultText');
+  div.innerHTML = '';
+  wordTokens = [];
+
+  if (lang === 'ja') {
+    // 4글자 묶음 (줄바꿈 보존)
+    const CHUNK = 4;
+    let i = 0;
+    while (i < text.length) {
+      if (text[i] === '\n') {
+        div.appendChild(document.createElement('br'));
+        i++; continue;
+      }
+      const chunk = text.slice(i, i + CHUNK);
+      const idx = wordTokens.length;
+      wordTokens.push(chunk);
+      const span = document.createElement('span');
+      span.className   = 'word-span';
+      span.textContent = chunk;
+      span.title       = '클릭 → 이 부분부터 재생';
+      span.onclick     = () => speakFromWord(idx);
+      div.appendChild(span);
+      i += CHUNK;
+    }
+  } else {
+    // 한국어: 띄어쓰기 단위
+    const parts = text.split(/(\s+)/);
+    parts.forEach(token => {
+      if (!token) return;
+      if (/^\s+$/.test(token)) {
+        if (token.includes('\n')) div.appendChild(document.createElement('br'));
+        else div.appendChild(document.createTextNode(' '));
+      } else {
+        const idx = wordTokens.length;
+        wordTokens.push(token);
+        const span = document.createElement('span');
+        span.className   = 'word-span';
+        span.textContent = token;
+        span.title       = '클릭 → 이 단어부터 재생';
+        span.onclick     = () => speakFromWord(idx);
+        div.appendChild(span);
+      }
+    });
+  }
+}
+
+// ══════════════════════════════════════════
+// TTS
+// ══════════════════════════════════════════
+function speakResult() { speakFromWord(0); }
+
+function speakFromWord(startIdx) {
+  stopSpeak();
+  const spans = Array.from(document.querySelectorAll('#resultText .word-span'));
+  if (!spans.length || startIdx >= spans.length) return;
+
+  const sep       = resultLang === 'ja' ? '' : ' ';
+  const speakText = spans.slice(startIdx).map(s => s.textContent).join(sep)
+                         .replace(/[*#_~`]/g, '');
+  if (!speakText.trim()) return;
+
+  window.speechSynthesis.cancel();
+  const utt   = new SpeechSynthesisUtterance(speakText);
+  const speed = parseFloat(document.getElementById('speedSlider').value);
+
+  // ★ TTS 언어를 resultLang으로 명확히 고정
+  utt.lang = resultLang === 'ja' ? 'ja-JP' : 'ko-KR';
+  utt.rate = speed;
+
+  const totalSpans  = spans.length;
+  let   boundaryIdx = 0;
+  let   hlTimer     = null; // fallback 하이라이트 타이머
+
+  utt.onstart = () => {
+    document.getElementById('speakBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display  = 'flex';
+    document.getElementById('ttsHint').textContent    = '재생 중 속도 변경은 다음 재생에 적용됩니다';
+    startProgressAnim(startIdx, totalSpans, speakText.length, speed);
+
+    // fallback: onboundary 미지원 브라우저 대비 타이머 하이라이트
+    const msPerSpan = Math.max((speakText.length * 130 / speed) / (totalSpans - startIdx), 300);
+    let fi = startIdx;
+    hlTimer = setInterval(() => {
+      if (fi >= spans.length) { clearInterval(hlTimer); return; }
+      clearHighlight();
+      spans[fi].classList.add('speaking');
+      fi++;
+    }, msPerSpan);
+  };
+
+  utt.onboundary = (e) => {
+    if (e.name !== 'word') return;
+    // onboundary 지원 시 fallback 타이머 중지
+    clearInterval(hlTimer);
+    clearHighlight();
+    const hi = startIdx + boundaryIdx;
+    if (hi < spans.length) spans[hi].classList.add('speaking');
+    boundaryIdx++;
+  };
+
+  utt.onend = () => {
+    clearInterval(hlTimer);
+    clearHighlight();
+    document.getElementById('speakBtn').style.display = 'flex';
+    document.getElementById('stopBtn').style.display  = 'none';
+    document.getElementById('ttsHint').textContent    = '';
+    clearInterval(progressTimer);
+    setProgress(100, '재생 완료 ✓');
+  };
+
+  utt.onerror = () => {
+    clearInterval(hlTimer);
+    stopSpeak();
+  };
+
+  window.speechSynthesis.speak(utt);
+}
+
+function clearHighlight() {
+  document.querySelectorAll('.word-span.speaking').forEach(s => s.classList.remove('speaking'));
+}
+
+// ══════════════════════════════════════════
+// 진행바
+// ══════════════════════════════════════════
+function startProgressAnim(startIdx, total, charLen, speed) {
+  clearInterval(progressTimer);
+  const startPct  = total > 1 ? (startIdx / total) * 100 : 0;
+  const estMs     = Math.max((charLen * 130) / speed, 600);
+  const startTime = Date.now();
+
+  progressTimer = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    const pct     = Math.min(startPct + (elapsed / estMs) * (100 - startPct), 98);
+    const remSec  = Math.max(0, Math.round((estMs - elapsed) / 1000));
+    setProgress(pct, remSec > 0 ? `재생 중 · 약 ${remSec}초 남음` : '거의 다 됐어요...');
+  }, 250);
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progressBar').style.width   = pct + '%';
+  document.getElementById('progressLabel').textContent = label;
+}
+
+function stopSpeak() {
+  window.speechSynthesis.cancel();
+  clearInterval(progressTimer);
+  clearHighlight();
+  setProgress(0, '재생 대기 중');
+  document.getElementById('speakBtn').style.display = 'flex';
+  document.getElementById('stopBtn').style.display  = 'none';
+  document.getElementById('ttsHint').textContent    = '';
+}
+
+// ══════════════════════════════════════════
+// 복사
+// ══════════════════════════════════════════
+function copyResult() {
+  const spans = document.querySelectorAll('#resultText .word-span');
+  if (!spans.length) return;
+  const sep  = resultLang === 'ja' ? '' : ' ';
+  const text = Array.from(spans).map(s => s.textContent).join(sep);
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('클립보드에 복사되었습니다 ✓');
+  }).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('복사되었습니다 ✓');
+  });
+}
+
+// ══════════════════════════════════════════
+// UI 헬퍼
+// ══════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+</script>
+</body>
+</html>
