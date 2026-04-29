@@ -1,741 +1,417 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#ffffff">
-<title>아이디어 뱅크 — 여은혜</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#F5F3EE; --surface:#FFFFFF; --surface2:#F0EDE6;
-  --border:rgba(0,0,0,0.08); --border-md:rgba(0,0,0,0.13);
-  --text:#1A1814; --muted:#7A7670; --hint:#B0ADA8;
-  --accent:#2B4FDB; --accent-bg:#EEF1FB;
-  --danger:#C0392B; --danger-bg:#FDF0EF;
-  --success:#1A7A4A; --success-bg:#EDF7F2;
-  --r:14px; --rsm:10px; --tap:48px;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overscroll-behavior:none;}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;}
-
-/* ── TOPBAR ── */
-.topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.logo{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;letter-spacing:0.02em;flex-shrink:0;}
-.logo em{color:var(--accent);font-style:normal;}
-.sync-label{font-size:11px;color:var(--hint);display:flex;align-items:center;gap:5px;cursor:pointer;}
-.sync-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;}
-.dot-local{background:#E89020;} .dot-sheets{background:var(--success);} .dot-syncing{background:var(--accent);animation:pulse 1s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-.topbar-right{display:flex;align-items:center;gap:4px;}
-.icon-btn{width:var(--tap);height:var(--tap);border-radius:12px;border:none;background:transparent;color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;}
-.icon-btn:hover,.icon-btn:active{background:var(--surface2);}
-.icon-btn.edit-on{background:var(--danger-bg);color:var(--danger);}
-.text-btn{height:36px;padding:0 14px;border-radius:20px;border:1px solid var(--border-md);background:var(--surface);color:var(--muted);font-size:12px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:5px;}
-.text-btn:hover{background:var(--surface2);color:var(--text);}
-.text-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
-.text-btn.primary:hover{opacity:0.88;}
-.text-btn.edit-on{background:var(--danger-bg);color:var(--danger);border-color:rgba(192,57,43,0.3);}
-.text-btn.sheets-btn{background:var(--success-bg);color:var(--success);border-color:rgba(26,122,74,0.3);}
-
-/* ── SEARCH ── */
-.search-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 1.25rem;}
-.search-inner{position:relative;display:flex;align-items:center;background:var(--surface2);border-radius:12px;border:1px solid var(--border-md);}
-.search-icon{position:absolute;left:12px;font-size:14px;color:var(--hint);pointer-events:none;}
-.search-input{width:100%;height:40px;font-size:14px;font-family:'Noto Sans KR',sans-serif;padding:0 40px 0 38px;border:none;background:transparent;color:var(--text);outline:none;}
-.search-input::placeholder{color:var(--hint);}
-.search-clear{position:absolute;right:6px;width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--hint);font-size:18px;display:none;align-items:center;justify-content:center;cursor:pointer;}
-
-/* ── FILTER ── */
-.filter-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.25rem 10px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.filter-bar::-webkit-scrollbar{display:none;}
-.chip{display:inline-flex;align-items:center;font-family:'Noto Sans KR',sans-serif;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border-md);background:transparent;color:var(--muted);cursor:pointer;margin-right:6px;transition:all 0.15s;white-space:nowrap;}
-.chip.active{background:var(--text);color:var(--bg);border-color:var(--text);}
-.chip:hover{border-color:var(--border-md);color:var(--text);}
-
-/* ── STATS ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
-.stat{background:var(--surface);padding:10px 8px;text-align:center;}
-.stat-n{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;display:block;}
-.stat-l{font-size:10px;color:var(--muted);display:block;margin-top:1px;}
-
-/* ── EDIT BANNER ── */
-.edit-banner{display:none;background:var(--danger-bg);border-bottom:1px solid rgba(192,57,43,0.15);padding:10px 1.25rem;}
-.edit-banner.show{display:block;}
-.edit-hints{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
-.hint-tag{font-size:11px;color:var(--danger);background:rgba(192,57,43,0.1);padding:3px 8px;border-radius:6px;}
-.edit-done-btn{width:100%;height:42px;background:var(--danger);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;}
-
-/* ── MAIN / GRID ── */
-.main{padding:1.25rem;padding-bottom:6rem;}
-/* Mobile: single column */
-.grid{display:flex;flex-direction:column;gap:12px;}
-/* PC: multi column */
-@media(min-width:768px){
-  .main{padding:1.5rem 2rem 5rem;max-width:1200px;margin:0 auto;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
-  .edit-done-btn{width:auto;padding:0 24px;}
-  .edit-hints{margin-bottom:0;}
-  .edit-banner .inner{display:flex;align-items:center;justify-content:space-between;}
-}
-
-/* ── CAT CARD ── */
-.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:box-shadow 0.2s;}
-@media(min-width:768px){.cat-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.06);}}
-.cat-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:var(--tap);}
-.cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-.cat-title{font-size:14px;font-weight:500;flex:1;cursor:default;}
-.cat-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--hint);}
-.cat-del{width:36px;height:36px;border-radius:10px;border:none;background:var(--danger-bg);color:var(--danger);font-size:15px;cursor:pointer;display:none;align-items:center;justify-content:center;flex-shrink:0;}
-.edit-active .cat-del{display:flex;}
-
-/* ── IDEAS ── */
-.idea-list{padding:4px 8px;}
-.idea-row{display:flex;align-items:center;gap:4px;border-radius:10px;margin-bottom:2px;}
-.idea-main{flex:1;display:flex;align-items:center;justify-content:space-between;min-height:var(--tap);padding:8px 10px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--muted);transition:all 0.12s;width:100%;}
-.idea-main:hover,.idea-main:active{background:var(--surface2);}
-.idea-main .r{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;padding:3px 7px;border-radius:5px;letter-spacing:0.02em;}
-.b-ai{background:var(--accent-bg);color:var(--accent);}
-.b-plain{background:var(--success-bg);color:var(--success);}
-.arr{font-size:11px;color:var(--hint);}
-.badge-tap{cursor:pointer;}
-.badge-tap:active{opacity:0.6;}
-.del-idea{width:var(--tap);height:var(--tap);border-radius:12px;border:none;background:transparent;color:var(--hint);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;flex-shrink:0;}
-.edit-active .del-idea{display:flex;}
-.del-idea:hover,.del-idea:active{background:var(--danger-bg);color:var(--danger);}
-
-/* ── ADD ROW ── */
-.add-row{display:none;padding:8px 8px 10px;border-top:1px dashed var(--border-md);gap:6px;flex-direction:column;}
-.edit-active .add-row{display:flex;}
-.add-input-row{display:flex;gap:6px;align-items:center;}
-.add-in{flex:1;height:42px;font-size:14px;font-family:'Noto Sans KR',sans-serif;padding:0 14px;border-radius:12px;border:1px dashed var(--border-md);background:transparent;color:var(--text);outline:none;transition:all 0.15s;min-width:0;}
-.add-in:focus{border-color:var(--accent);background:var(--accent-bg);border-style:solid;}
-.add-in::placeholder{color:var(--hint);}
-.add-ok{height:42px;padding:0 16px;border-radius:12px;border:1px solid var(--border-md);background:var(--surface2);color:var(--muted);font-size:14px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
-.add-ok:hover,.add-ok:active{background:var(--text);color:var(--bg);}
-.add-ai-row{display:flex;align-items:center;gap:8px;padding:0 4px;}
-.add-ai-label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;}
-
-/* ── TOGGLE ── */
-.tog-wrap{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0;}
-.tog-wrap input{opacity:0;width:0;height:0;position:absolute;}
-.tog-track{position:absolute;inset:0;border-radius:11px;background:var(--border-md);cursor:pointer;transition:background 0.2s;}
-.tog-thumb{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);pointer-events:none;}
-.tog-wrap input:checked+.tog-track{background:var(--accent);}
-.tog-wrap input:checked~.tog-thumb{transform:translateX(16px);}
-
-/* ── ADD CAT ── */
-.add-cat-btn{display:none;width:100%;height:52px;border-radius:var(--r);border:1.5px dashed var(--border-md);background:transparent;color:var(--hint);font-size:14px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;}
-.add-cat-btn.show{display:flex;}
-.add-cat-btn:hover,.add-cat-btn:active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
-
-/* ── SHEETS STATUS BAR ── */
-.sheets-status{display:none;background:var(--success-bg);border-bottom:1px solid rgba(26,122,74,0.15);padding:8px 1.25rem;font-size:12px;color:var(--success);align-items:center;justify-content:space-between;gap:8px;}
-.sheets-status.show{display:flex;}
-.sheets-status button{font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid rgba(26,122,74,0.3);background:transparent;color:var(--success);cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
-
-/* ── BOTTOM SHEET ── */
-.sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:flex-end;justify-content:center;}
-.sheet-bg.open{display:flex;}
-.sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;padding:0 0 max(1.5rem,env(safe-area-inset-bottom));max-height:90vh;overflow-y:auto;}
-@media(min-width:768px){
-  .sheet-bg{align-items:center;}
-  .sheet{border-radius:16px;width:480px;max-height:80vh;padding-bottom:0;}
-}
-.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--border-md);margin:12px auto 16px;}
-@media(min-width:768px){.sheet-handle{display:none;}}
-.sheet-title{font-size:16px;font-weight:500;padding:0 1.25rem 1rem;border-bottom:1px solid var(--border);}
-@media(min-width:768px){.sheet-title{padding:1.25rem 1.5rem 1rem;}}
-.sheet-body{padding:1rem 1.25rem 1.5rem;}
-@media(min-width:768px){.sheet-body{padding:1.25rem 1.5rem 1.5rem;}}
-.sheet-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1rem;}
-.sheet-steps{background:var(--surface2);border-radius:12px;padding:1rem;margin-bottom:1rem;}
-.sheet-step{display:flex;gap:10px;font-size:13px;color:var(--muted);margin-bottom:8px;}
-.sheet-step:last-child{margin-bottom:0;}
-.step-n{width:20px;height:20px;border-radius:50%;background:var(--surface);border:1px solid var(--border-md);font-family:'DM Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);}
-.url-input{width:100%;height:44px;font-size:13px;font-family:'DM Mono',monospace;padding:0 14px;border-radius:12px;border:1px solid var(--border-md);background:var(--surface2);color:var(--text);outline:none;margin-bottom:8px;}
-.url-input:focus{border-color:var(--accent);background:var(--accent-bg);}
-.sheet-note{font-size:11px;color:var(--hint);line-height:1.6;margin-bottom:1.25rem;}
-.sheet-btns{display:flex;gap:8px;}
-.sheet-btn{flex:1;height:48px;border-radius:12px;font-size:14px;font-weight:500;font-family:'Noto Sans KR',sans-serif;border:1px solid var(--border-md);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all 0.15s;}
-.sheet-btn:hover,.sheet-btn:active{background:var(--surface);}
-.sheet-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
-.sheet-btn.primary:hover,.sheet-btn.primary:active{opacity:0.88;}
-
-/* ── PROMPT SHEET ── */
-.prompt-preview{font-size:13px;font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--muted);line-height:1.7;margin-bottom:1rem;white-space:pre-wrap;}
-
-/* ── MENU SHEET ── */
-.menu-item{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 4px;border:none;background:transparent;font-size:15px;font-family:'Noto Sans KR',sans-serif;color:var(--text);cursor:pointer;border-radius:12px;text-align:left;transition:background 0.1s;}
-.menu-item:hover,.menu-item:active{background:var(--surface2);}
-.mi-icon{font-size:20px;width:32px;text-align:center;}
-.menu-item.danger{color:var(--danger);}
-.menu-divider{height:1px;background:var(--border);margin:4px 0;}
-
-/* ── UNDO ── */
-.undo-snack{display:none;position:fixed;bottom:1.5rem;left:1rem;right:1rem;background:var(--text);color:var(--bg);border-radius:14px;padding:12px 16px;font-size:13px;z-index:300;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
-.undo-snack.show{display:flex;}
-@media(min-width:768px){.undo-snack{left:50%;right:auto;transform:translateX(-50%);white-space:nowrap;width:auto;min-width:280px;}}
-.undo-act{font-size:13px;font-weight:500;color:#88B4FF;background:none;border:none;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif;}
-.undo-prog{position:absolute;bottom:0;left:0;height:3px;background:rgba(255,255,255,0.3);border-radius:0 0 14px 14px;width:100%;transform-origin:left;animation:undoProg 4s linear forwards;}
-@keyframes undoProg{from{transform:scaleX(1);}to{transform:scaleX(0);}}
-
-/* ── TOAST ── */
-.toast-wrap{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:500;pointer-events:none;}
-.toast-el{background:rgba(26,24,20,0.88);color:#fff;font-size:13px;padding:9px 18px;border-radius:20px;white-space:nowrap;font-family:'Noto Sans KR',sans-serif;opacity:0;transition:opacity 0.2s;}
-.toast-el.show{opacity:1;}
-
-/* ── HIGHLIGHT ── */
-mark{background:rgba(43,79,219,0.15);border-radius:2px;color:inherit;}
-
-/* ── PC only overrides ── */
-@media(min-width:768px){
-  .topbar{padding:0 2rem;height:56px;}
-  .search-bar,.filter-bar{padding-left:2rem;padding-right:2rem;}
-  .stats .stat-l{font-size:11px;}
-  .idea-main{min-height:40px;padding:6px 10px;}
-  .del-idea{width:32px;height:32px;}
-  .cat-del{width:30px;height:30px;}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>아이디어 뱅크 v2.0 — 여은혜</title>
+    <!-- Tailwind CSS & Lucide Icons & React -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #F5F3EE; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .toast-active { opacity: 1 !important; transform: translateY(0) !important; }
+    </style>
 </head>
 <body>
+    <div id="root"></div>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <span class="logo">IDEA<em>BANK</em></span>
-  <span class="sync-label" id="syncLabel" onclick="openSheet('sheetsSheet')">
-    <span class="sync-dot dot-local" id="syncDot"></span>
-    <span id="syncText">로컬 저장</span>
-  </span>
-  <div class="topbar-right">
-    <!-- PC: text buttons -->
-    <button class="text-btn sheets-btn pc-only" onclick="openSheet('sheetsSheet')" id="sheetsBtn">📊 Sheets 연동</button>
-    <button class="text-btn pc-only" onclick="manualSync()">🔄 동기화</button>
-    <button class="text-btn pc-only" onclick="exportData()">⬇ 백업</button>
-    <label class="text-btn pc-only" style="cursor:pointer;">⬆ 복원<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
-    <button class="text-btn pc-only" onclick="resetData()" style="color:var(--danger);border-color:rgba(192,57,43,0.3);">🔄 초기화</button>
-    <!-- Both: edit & menu -->
-    <button class="icon-btn" id="editBtn" onclick="toggleEdit()" title="편집">✏️</button>
-    <button class="icon-btn mobile-only" onclick="openMenu()" title="메뉴">⋯</button>
-  </div>
-</div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-<!-- SHEETS STATUS (연동 후 표시) -->
-<div class="sheets-status" id="sheetsStatus">
-  <span id="sheetsStatusText">📊 Sheets 연동됨</span>
-  <button onclick="manualSync()">지금 동기화</button>
-</div>
+        // 아이콘 컴포넌트 래퍼
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const [iconSvg, setIconSvg] = useState("");
+            useEffect(() => {
+                if (window.lucide) {
+                    const svg = window.lucide.createIcons();
+                }
+            }, []);
+            return <i data-lucide={name} style={{width: size, height: size}} className={className}></i>;
+        };
 
-<!-- EDIT BANNER -->
-<div class="edit-banner" id="editBanner">
-  <div class="inner">
-    <div class="edit-hints">
-      <span class="hint-tag">탭/클릭 → 수정</span>
-      <span class="hint-tag">🗑 → 삭제</span>
-      <span class="hint-tag">AI 배지 → 전환</span>
-      <span class="hint-tag">카테고리 추가 가능</span>
-    </div>
-    <button class="edit-done-btn" onclick="toggleEdit()">✅ 편집 완료</button>
-  </div>
-</div>
+        const App = () => {
+            const [data, setData] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [isAdmin, setIsAdmin] = useState(false);
+            const [apiUrl, setApiUrl] = useState(localStorage.getItem('ib_api_url') || '');
+            const [adminPass, setAdminPass] = useState(localStorage.getItem('ib_admin_pass') || '1234');
+            
+            const [activeModal, setActiveModal] = useState(null);
+            const [selectedIdea, setSelectedIdea] = useState(null);
+            const [selectedCatId, setSelectedCatId] = useState(null);
+            const [toastMsg, setToastMsg] = useState("");
 
-<!-- SEARCH -->
-<div class="search-bar">
-  <div class="search-inner">
-    <span class="search-icon">🔍</span>
-    <input class="search-input" id="searchInput" placeholder="아이디어 검색..." oninput="onSearch(this.value)" autocomplete="off">
-    <button class="search-clear" id="searchClear" onclick="clearSearch()">×</button>
-  </div>
-</div>
+            useEffect(() => {
+                if (apiUrl) loadData();
+            }, []);
 
-<!-- FILTER -->
-<div class="filter-bar" id="filterBar"></div>
+            useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, [data, isAdmin, activeModal]);
 
-<!-- STATS -->
-<div class="stats" id="statsBar"></div>
+            const showToast = (msg) => {
+                setToastMsg(msg);
+                setTimeout(() => setToastMsg(""), 2000);
+            };
 
-<!-- MAIN -->
-<div class="main"><div class="grid" id="grid"></div></div>
+            const loadData = async () => {
+                if (!apiUrl) return;
+                setLoading(true);
+                try {
+                    const res = await fetch(`${apiUrl}?action=load`);
+                    const json = await res.json();
+                    setData(Array.isArray(json) ? json : []);
+                } catch (e) {
+                    showToast("데이터 로드 실패");
+                } finally {
+                    setLoading(false);
+                }
+            };
 
-<!-- UNDO -->
-<div class="undo-snack" id="undoSnack">
-  <span id="undoMsg"></span>
-  <button class="undo-act" onclick="doUndo()">되돌리기</button>
-  <div class="undo-prog" id="undoProg"></div>
-</div>
+            const saveData = async (newData) => {
+                if (!apiUrl) return;
+                setLoading(true);
+                try {
+                    await fetch(apiUrl, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'save', data: newData })
+                    });
+                    setData(newData);
+                    showToast("저장되었습니다");
+                } catch (e) {
+                    showToast("저장 실패");
+                } finally {
+                    setLoading(false);
+                }
+            };
 
-<!-- TOAST -->
-<div class="toast-wrap"><div class="toast-el" id="toastEl"></div></div>
+            const handleAdminToggle = () => {
+                if (isAdmin) {
+                    setIsAdmin(false);
+                    showToast("읽기 모드 전환");
+                } else {
+                    const pass = prompt("관리자 비밀번호를 입력하세요:");
+                    if (pass === adminPass) {
+                        setIsAdmin(true);
+                        showToast("관리자 인증 성공");
+                    } else {
+                        showToast("비밀번호 오류");
+                    }
+                }
+            };
 
-<!-- SHEETS SHEET -->
-<div class="sheet-bg" id="sheetsSheet">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">📊 Google Sheets 연동</div>
-    <div class="sheet-body">
-      <p class="sheet-desc">Apps Script 웹앱 URL을 입력하면 Sheets와 양방향으로 동기화돼요.</p>
-      <div class="sheet-steps">
-        <div class="sheet-step"><div class="step-n">1</div><span>Google Sheets 새 파일 생성</span></div>
-        <div class="sheet-step"><div class="step-n">2</div><span>확장 프로그램 → Apps Script → 코드 붙여넣기</span></div>
-        <div class="sheet-step"><div class="step-n">3</div><span>배포 → 웹앱으로 배포 → 누구나 접근 허용</span></div>
-        <div class="sheet-step"><div class="step-n">4</div><span>배포 URL을 아래에 붙여넣기</span></div>
-      </div>
-      <input class="url-input" id="sheetsUrlInput" placeholder="https://script.google.com/macros/s/...">
-      <p class="sheet-note">※ URL을 비워두면 연동이 해제돼요. 연동 전까지는 로컬에 안전하게 저장됩니다.</p>
-      <div class="sheet-btns">
-        <button class="sheet-btn" onclick="closeSheet('sheetsSheet')">취소</button>
-        <button class="sheet-btn primary" onclick="saveSheetsUrl()">연동 저장</button>
-      </div>
-    </div>
-  </div>
-</div>
+            const addCategory = () => {
+                const title = prompt("새 카테고리 이름:");
+                if (!title) return;
+                const newCat = {
+                    id: 'cat_' + Date.now(),
+                    title,
+                    color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                    ideas: []
+                };
+                saveData([...data, newCat]);
+            };
 
-<!-- PROMPT SHEET -->
-<div class="sheet-bg" id="promptSheet">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">🚀 앱 제작 프롬프트</div>
-    <div class="sheet-body">
-      <div class="prompt-preview" id="promptPreview"></div>
-      <p class="sheet-desc">Claude 새 대화에 붙여넣으면 바로 제작이 시작돼요.</p>
-      <div class="sheet-btns">
-        <button class="sheet-btn" onclick="closeSheet('promptSheet')">닫기</button>
-        <button class="sheet-btn primary" onclick="confirmCopy()">📋 복사하기</button>
-      </div>
-    </div>
-  </div>
-</div>
+            const addIdea = (catId) => {
+                const input = document.getElementById(`input-${catId}`);
+                const name = input.value;
+                if (!name) return;
+                
+                const newData = data.map(cat => {
+                    if (cat.id === catId) {
+                        return {
+                            ...cat,
+                            ideas: [...cat.ideas, {
+                                id: 'id_' + Date.now(),
+                                name,
+                                ai: false,
+                                status: '미완성',
+                                level: 1,
+                                aiName: '',
+                                createdAt: new Date().toLocaleDateString(),
+                                completedAt: ''
+                            }]
+                        };
+                    }
+                    return cat;
+                });
+                input.value = '';
+                saveData(newData);
+            };
 
-<!-- MENU SHEET (mobile) -->
-<div class="sheet-bg" id="menuSheet">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">메뉴</div>
-    <div class="sheet-body" style="padding-top:8px;">
-      <button class="menu-item" onclick="closeSheet('menuSheet');openSheet('sheetsSheet')"><span class="mi-icon">📊</span>Google Sheets 연동</button>
-      <button class="menu-item" onclick="closeSheet('menuSheet');manualSync()"><span class="mi-icon">🔄</span>지금 동기화</button>
-      <button class="menu-item" onclick="closeSheet('menuSheet');exportData()"><span class="mi-icon">⬇️</span>JSON 백업</button>
-      <label class="menu-item" style="cursor:pointer;"><span class="mi-icon">⬆️</span>백업 복원<input type="file" accept=".json" style="display:none" onchange="importData(event);closeSheet('menuSheet')"></label>
-      <div class="menu-divider"></div>
-      <button class="menu-item danger" onclick="closeSheet('menuSheet');resetData()"><span class="mi-icon">🔄</span>기본 데이터 초기화</button>
-    </div>
-  </div>
-</div>
+            const deleteIdea = (e, catId, ideaId) => {
+                e.stopPropagation();
+                if(!confirm("삭제하시겠습니까?")) return;
+                const newData = data.map(cat => {
+                    if (cat.id === catId) {
+                        return { ...cat, ideas: cat.ideas.filter(i => i.id !== ideaId) };
+                    }
+                    return cat;
+                });
+                saveData(newData);
+            };
 
-<!-- IDEA EDIT SHEET -->
-<div class="sheet-bg" id="ideaEditSheet">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">아이디어 수정</div>
-    <div class="sheet-body">
-      <input class="url-input" id="ideaNameInput" placeholder="아이디어 이름" style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;">
-        <label class="add-ai-label">
-          <label class="tog-wrap">
-            <input type="checkbox" id="ideaAiToggle">
-            <span class="tog-track"></span>
-            <span class="tog-thumb"></span>
-          </label>
-          <span id="ideaAiLabel" style="font-size:14px;">AI 연동 필요</span>
-        </label>
-      </div>
-      <div class="sheet-btns">
-        <button class="sheet-btn" onclick="closeSheet('ideaEditSheet')">취소</button>
-        <button class="sheet-btn primary" onclick="saveIdeaEdit()">저장</button>
-      </div>
-    </div>
-  </div>
-</div>
+            const moveIdea = (e, catId, index, direction) => {
+                e.stopPropagation();
+                const newData = [...data];
+                const cat = newData.find(c => c.id === catId);
+                const newIdx = index + direction;
+                if (newIdx < 0 || newIdx >= cat.ideas.length) return;
+                const [moved] = cat.ideas.splice(index, 1);
+                cat.ideas.splice(newIdx, 0, moved);
+                saveData(newData);
+            };
 
-<!-- CAT EDIT SHEET -->
-<div class="sheet-bg" id="catEditSheet">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">카테고리 이름 수정</div>
-    <div class="sheet-body">
-      <input class="url-input" id="catNameInput" placeholder="카테고리 이름" style="margin-bottom:1.25rem;">
-      <div class="sheet-btns">
-        <button class="sheet-btn" onclick="closeSheet('catEditSheet')">취소</button>
-        <button class="sheet-btn primary" onclick="saveCatName()">저장</button>
-      </div>
-    </div>
-  </div>
-</div>
+            return (
+                <div className="min-h-screen pb-24">
+                    {/* Header */}
+                    <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-200 z-40 px-4 py-4 flex justify-between items-center">
+                        <div>
+                            <h1 className="text-xl font-bold flex items-center gap-2">
+                                <i data-lucide="brain" className="text-blue-600"></i> 아이디어 뱅크
+                            </h1>
+                            <p className="text-[10px] text-gray-400 font-mono">IDEABANK SYSTEM V2.0</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={() => setActiveModal('settings')} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full">
+                                <i data-lucide="settings"></i>
+                            </button>
+                            <button 
+                                onClick={handleAdminToggle}
+                                className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${isAdmin ? 'bg-blue-600 text-white shadow-lg' : 'bg-white border border-gray-200 text-gray-600'}`}
+                            >
+                                <i data-lucide={isAdmin ? "unlock" : "lock"} style={{width: 14}}></i>
+                                {isAdmin ? 'ADMIN' : 'READ ONLY'}
+                            </button>
+                        </div>
+                    </header>
 
-<style>
-@media(min-width:768px){.mobile-only{display:none!important;}}
-@media(max-width:767px){.pc-only{display:none!important;}}
-</style>
+                    {/* Main Content */}
+                    <main className="p-4 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                        {isAdmin && (
+                            <button onClick={addCategory} className="border-2 border-dashed border-gray-300 rounded-3xl p-10 flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all bg-white/50 group">
+                                <i data-lucide="plus" className="mb-2 group-hover:scale-110 transition-transform"></i>
+                                <span className="font-bold">새 카테고리 추가</span>
+                            </button>
+                        )}
 
-<script>
-// ══ DEFAULT DATA ══
-const DEFAULTS=[{id:"이벤트",title:"이벤트·현장",color:"#7F77DD",ideas:[{name:"AI 런닝시트 자동완성기",ai:true},{name:"현장 인력 배치 시뮬레이터",ai:true},{name:"행사 리스크 점수 계산기",ai:true},{name:"VIP 게스트 프로파일 카드",ai:false},{name:"스폰서 제안 패키지 생성기",ai:true},{name:"행사 콘셉트 무드보드 생성기",ai:true},{name:"관객 동선 시뮬레이터",ai:false},{name:"아티스트 라이더 체크리스트",ai:false},{name:"현장 비상연락망 자동 생성기",ai:false},{name:"행사 날씨 플랜B 생성기",ai:true}]},{id:"세일즈",title:"세일즈·브랜딩",color:"#D85A30",ideas:[{name:"AI 제안서 초안 생성기",ai:true},{name:"클라이언트 자동 CRM",ai:false},{name:"가격 협상 시나리오 생성기",ai:true},{name:"콜드 메일 성공률 분석기",ai:true},{name:"팝업스토어 성과 대시보드",ai:false},{name:"ROI 계산기",ai:false},{name:"경쟁사 벤치마킹 보드",ai:false},{name:"세일즈 파이프라인 시각화",ai:false}]},{id:"다국어",title:"다국어·글로벌",color:"#1D9E75",ideas:[{name:"한·영·일 이메일 템플릿 생성기",ai:true},{name:"일본어 경어 레벨 변환기",ai:true},{name:"나라별 비즈니스 에티켓 가이드",ai:true},{name:"다국어 긴급 상황 대응 카드",ai:false},{name:"글로벌 시차 스케줄러",ai:false},{name:"현장 안내방송 스크립트 번역기",ai:true}]},{id:"AI",title:"AI 페르소나",color:"#378ADD",ideas:[{name:"일본 비즈니스 파트너 봇",ai:true},{name:"베테랑 이벤트 디렉터 자문 봇",ai:true},{name:"냉철한 세일즈 코치 봇",ai:true},{name:"커리어 멘토 봇",ai:true},{name:"AI 협상 시뮬레이터",ai:true}]},{id:"커리어",title:"커리어·포트폴리오",color:"#BA7517",ideas:[{name:"인터랙티브 포트폴리오 웹사이트",ai:false},{name:"프로젝트 임팩트 수치 계산기",ai:false},{name:"면접 Q&A 연습 앱",ai:true},{name:"강점 언어 발굴기",ai:true},{name:"커리어 타임라인 시각화",ai:false},{name:"자기소개서 버전 관리기",ai:false}]},{id:"재무",title:"재무·정산",color:"#639922",ideas:[{name:"프리랜서 수입·지출 트래커",ai:false},{name:"프로젝트별 시간당 단가 계산기",ai:false},{name:"출장 경비 정산 자동화",ai:false},{name:"영수증 OCR 경비 자동 입력",ai:true},{name:"행사별 수익성 자동 분석기",ai:false}]},{id:"생활",title:"생활·웰빙",color:"#D4537E",ideas:[{name:"현장 당일 에너지 관리 플래너",ai:true},{name:"수면·컨디션 트래커",ai:false},{name:"AI 여행 패킹 리스트 생성기",ai:true},{name:"냉장고 재료 레시피 생성기",ai:true},{name:"집중 모드 BGM 플레이어",ai:false}]},{id:"미래",title:"미래형·독창적",color:"#888780",ideas:[{name:"나만의 AI 비서 대시보드",ai:true},{name:"음성 메모 업무 자동화",ai:true},{name:"자동 SNS 행사 후기 생성기",ai:true},{name:"개인 브랜딩 통합 관리 허브",ai:true},{name:"나의 10년 후 시뮬레이터",ai:true},{name:"AI 감정 일기·번아웃 예방기",ai:true}]},{id:"연동",title:"연동 자동화",color:"#5DCAA5",ideas:[{name:"구글 캘린더 행사 자동 등록기",ai:false},{name:"Drive + Notion 프로젝트 허브",ai:false},{name:"Gmail + Notion 클라이언트 히스토리",ai:false},{name:"Sheets + Slack KPI 알림 봇",ai:false},{name:"음성 메모 → 노션 자동 저장",ai:true}]}];
-const DB_MAP={이벤트:"localStorage",세일즈:"Google Sheets",다국어:"없음",AI:"localStorage",커리어:"localStorage",재무:"Google Sheets",생활:"localStorage",미래:"Google Sheets",연동:"Google Sheets"};
+                        {data.map(cat => (
+                            <div key={cat.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full min-h-[400px]">
+                                <div className="p-5 flex justify-between items-center border-b border-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-4 h-4 rounded-full shadow-inner" style={{backgroundColor: cat.color}}></div>
+                                        <h3 className="font-bold text-lg">{cat.title}</h3>
+                                        <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold">{cat.ideas.length}</span>
+                                    </div>
+                                    {isAdmin && (
+                                        <button onClick={() => {if(confirm("카테고리를 삭제할까요?")) saveData(data.filter(c => c.id !== cat.id))}} className="text-gray-200 hover:text-red-400">
+                                            <i data-lucide="trash-2" style={{width: 18}}></i>
+                                        </button>
+                                    )}
+                                </div>
 
-// ══ STATE ══
-let cats=[],editMode=false,currentFilter="all",searchQuery="",sheetsUrl="";
-let undoStack=[],undoTimer=null,pendingPrompt="",editingCatId=null,editingIdeaKey=null;
+                                <div className="flex-1 p-3 space-y-2 overflow-y-auto hide-scrollbar max-h-[500px]">
+                                    {cat.ideas.map((idea, idx) => (
+                                        <div 
+                                            key={idea.id} 
+                                            onClick={() => { setSelectedCatId(cat.id); setSelectedIdea({...idea}); setActiveModal('idea_detail'); }}
+                                            className="group flex items-center justify-between p-4 rounded-2xl bg-gray-50/50 hover:bg-white hover:shadow-md border border-transparent hover:border-gray-100 transition-all cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-3 flex-1">
+                                                <div className={`w-2 h-2 rounded-full ${idea.status === '완료' ? 'bg-green-500' : idea.status === '작업중' ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                                                <div>
+                                                    <div className={`text-sm font-bold ${idea.status === '완료' ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                                                        {idea.name}
+                                                    </div>
+                                                    <div className="flex gap-2 mt-1">
+                                                        {idea.ai && <span className="text-[8px] bg-purple-600 text-white px-1.5 py-0.5 rounded-md font-black">AI</span>}
+                                                        <span className="text-[9px] text-gray-400 font-medium">난이도 {idea.level}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {isAdmin && (
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="flex flex-col">
+                                                        <button onClick={(e) => moveIdea(e, cat.id, idx, -1)} className="p-1 hover:text-blue-600 text-gray-300"><i data-lucide="chevron-up" style={{width: 14}}></i></button>
+                                                        <button onClick={(e) => moveIdea(e, cat.id, idx, 1)} className="p-1 hover:text-blue-600 text-gray-300"><i data-lucide="chevron-down" style={{width: 14}}></i></button>
+                                                    </div>
+                                                    <button onClick={(e) => deleteIdea(e, cat.id, idea.id)} className="p-2 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" style={{width: 16}}></i></button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
 
-// ══ LOAD / SAVE ══
-function loadData(){
-  try{const s=localStorage.getItem("ideabank_v3");cats=s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULTS));}
-  catch{cats=JSON.parse(JSON.stringify(DEFAULTS));}
-  sheetsUrl=localStorage.getItem("ideabank_sheets")||"";
-  updateSyncUI();
-}
-function saveData(){
-  localStorage.setItem("ideabank_v3",JSON.stringify(cats));
-}
+                                {isAdmin && (
+                                    <div className="p-4 bg-gray-50/80 border-t border-gray-100">
+                                        <div className="flex gap-2 bg-white p-1 rounded-2xl border border-gray-200 focus-within:ring-2 ring-blue-100 transition-all">
+                                            <input 
+                                                id={`input-${cat.id}`}
+                                                className="flex-1 bg-transparent px-3 py-2 text-sm outline-none"
+                                                placeholder="새로운 아이디어 구상..."
+                                                onKeyDown={(e) => e.key === 'Enter' && addIdea(cat.id)}
+                                            />
+                                            <button onClick={() => addIdea(cat.id)} className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm shadow-blue-200">추가</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </main>
 
-// ══ SYNC UI ══
-function updateSyncUI(){
-  const dot=document.getElementById("syncDot");
-  const txt=document.getElementById("syncText");
-  const status=document.getElementById("sheetsStatus");
-  if(sheetsUrl){
-    dot.className="sync-dot dot-sheets";
-    txt.textContent="Sheets 연동됨";
-    status.classList.add("show");
-  } else {
-    dot.className="sync-dot dot-local";
-    txt.textContent="로컬 저장";
-    status.classList.remove("show");
-  }
-}
-function setSyncing(on){
-  document.getElementById("syncDot").className="sync-dot "+(on?"dot-syncing":"dot-sheets");
-  document.getElementById("syncText").textContent=on?"동기화 중...":"Sheets 연동됨";
-}
+                    {/* Settings Modal */}
+                    {activeModal === 'settings' && (
+                        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+                            <div className="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h2 className="text-xl font-black">시스템 설정</h2>
+                                    <button onClick={() => setActiveModal(null)} className="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x"></i></button>
+                                </div>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">API Endpoint URL</label>
+                                        <input className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-xs font-mono" value={apiUrl} onChange={(e) => {setApiUrl(e.target.value); localStorage.setItem('ib_api_url', e.target.value);}} />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">Admin Password</label>
+                                        <input type="password" className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-xs font-mono" value={adminPass} onChange={(e) => {setAdminPass(e.target.value); localStorage.setItem('ib_admin_pass', e.target.value);}} />
+                                    </div>
+                                    <button onClick={() => {setActiveModal(null); loadData();}} className="w-full bg-black text-white py-5 rounded-[24px] font-black hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-gray-200">설정 적용하기</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-// ══ GOOGLE SHEETS API ══
-async function pushToSheets(){
-  if(!sheetsUrl) return;
-  setSyncing(true);
-  try{
-    await fetch(sheetsUrl,{
-      method:"POST",mode:"no-cors",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({action:"save",data:cats})
-    });
-    document.getElementById("sheetsStatusText").textContent="📊 Sheets 연동됨 — "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" 저장";
-  }catch(e){toast("Sheets 저장 실패 — 로컬에는 저장됨");}
-  setSyncing(false);
-}
+                    {/* Idea Detail Modal */}
+                    {activeModal === 'idea_detail' && selectedIdea && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center">
+                            <div className="bg-white w-full max-w-lg rounded-t-[40px] sm:rounded-[40px] p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+                                <div className="flex justify-between items-center mb-8">
+                                    <span className="bg-gray-100 px-3 py-1 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Idea Details</span>
+                                    <button onClick={() => setActiveModal(null)} className="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x"></i></button>
+                                </div>
+                                
+                                <div className="space-y-8">
+                                    <input 
+                                        disabled={!isAdmin}
+                                        className="w-full text-2xl font-black outline-none bg-transparent placeholder-gray-200"
+                                        value={selectedIdea.name}
+                                        onChange={(e) => setSelectedIdea({...selectedIdea, name: e.target.value})}
+                                    />
 
-async function pullFromSheets(){
-  if(!sheetsUrl) return;
-  setSyncing(true);
-  try{
-    const r=await fetch(sheetsUrl+"?action=load&t="+Date.now());
-    const j=await r.json();
-    if(j&&j.data&&Array.isArray(j.data)){
-      cats=j.data;
-      localStorage.setItem("ideabank_v3",JSON.stringify(cats));
-      render();
-      document.getElementById("sheetsStatusText").textContent="📊 Sheets에서 불러옴 — "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
-      toast("Sheets에서 최신 데이터를 불러왔어요");
-    }
-  }catch(e){toast("Sheets 불러오기 실패 — 로컬 데이터 사용 중");}
-  setSyncing(false);
-}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">현재 상태</label>
+                                            <select 
+                                                disabled={!isAdmin}
+                                                className="w-full bg-gray-50 border-none rounded-2xl px-4 py-4 font-bold text-sm"
+                                                value={selectedIdea.status}
+                                                onChange={(e) => {
+                                                    const s = e.target.value;
+                                                    setSelectedIdea({...selectedIdea, status: s, completedAt: s === '완료' ? new Date().toLocaleDateString() : ''});
+                                                }}
+                                            >
+                                                <option value="미완성">미완성</option>
+                                                <option value="작업중">작업 중</option>
+                                                <option value="완료">완료됨</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">난이도 (1-5)</label>
+                                            <div className="flex gap-1 h-[52px]">
+                                                {[1,2,3,4,5].map(lv => (
+                                                    <button 
+                                                        key={lv}
+                                                        onClick={() => isAdmin && setSelectedIdea({...selectedIdea, level: lv})}
+                                                        className={`flex-1 rounded-xl font-black text-xs transition-all ${selectedIdea.level >= lv ? 'bg-yellow-400 text-white' : 'bg-gray-100 text-gray-300'}`}
+                                                    >
+                                                        {lv}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
 
-function manualSync(){ pullFromSheets(); }
+                                    <div className="p-6 bg-purple-50 rounded-[32px] border border-purple-100">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2 text-purple-700 font-black text-sm">
+                                                <i data-lucide="sparkles" style={{width: 16}}></i> AI ENGINE
+                                            </div>
+                                            <input 
+                                                type="checkbox" 
+                                                className="w-6 h-6 accent-purple-600 rounded-lg" 
+                                                checked={selectedIdea.ai}
+                                                disabled={!isAdmin}
+                                                onChange={(e) => setSelectedIdea({...selectedIdea, ai: e.target.checked})}
+                                            />
+                                        </div>
+                                        {selectedIdea.ai && (
+                                            <input 
+                                                disabled={!isAdmin}
+                                                className="w-full bg-white border border-purple-100 rounded-xl px-4 py-3 text-sm outline-none placeholder-purple-300"
+                                                placeholder="사용할 모델명 (ex: Claude 3.5 Sonnet)"
+                                                value={selectedIdea.aiName}
+                                                onChange={(e) => setSelectedIdea({...selectedIdea, aiName: e.target.value})}
+                                            />
+                                        )}
+                                    </div>
 
-// save → local + sheets
-function save(){
-  saveData();
-  pushToSheets();
-}
+                                    <div className="grid grid-cols-2 gap-3 text-[10px] font-bold">
+                                        <div className="bg-gray-50 px-4 py-3 rounded-2xl">
+                                            <div className="text-gray-400 mb-1">CREATED</div>
+                                            <div className="text-gray-600">{selectedIdea.createdAt || '-'}</div>
+                                        </div>
+                                        <div className="bg-gray-50 px-4 py-3 rounded-2xl">
+                                            <div className="text-gray-400 mb-1">COMPLETED</div>
+                                            <div className="text-gray-600 font-mono text-blue-600">{selectedIdea.completedAt || 'PROCEEDING...'}</div>
+                                        </div>
+                                    </div>
 
-// ══ SHEETS MODAL ══
-function saveSheetsUrl(){
-  const url=document.getElementById("sheetsUrlInput").value.trim();
-  sheetsUrl=url;
-  localStorage.setItem("ideabank_sheets",url);
-  updateSyncUI();
-  closeSheet("sheetsSheet");
-  if(url){pullFromSheets();toast("Sheets 연동 완료 — 데이터를 불러오는 중...");}
-  else toast("Sheets 연동 해제됨");
-}
+                                    {isAdmin && (
+                                        <button 
+                                            onClick={() => {
+                                                const newData = data.map(cat => {
+                                                    if (cat.id === selectedCatId) {
+                                                        return { ...cat, ideas: cat.ideas.map(i => i.id === selectedIdea.id ? selectedIdea : i) };
+                                                    }
+                                                    return cat;
+                                                });
+                                                saveData(newData);
+                                                setActiveModal(null);
+                                            }}
+                                            className="w-full bg-blue-600 text-white py-5 rounded-[24px] font-black shadow-xl shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <i data-lucide="save"></i> 변경사항 저장하기
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-// ══ UNDO ══
-function pushUndo(msg,snap){
-  undoStack=[{msg,snap:JSON.parse(JSON.stringify(snap))}];
-  clearTimeout(undoTimer);
-  document.getElementById("undoMsg").textContent=msg;
-  const p=document.getElementById("undoProg");
-  p.style.animation="none";p.offsetHeight;p.style.animation="undoProg 4s linear forwards";
-  document.getElementById("undoSnack").classList.add("show");
-  undoTimer=setTimeout(()=>{document.getElementById("undoSnack").classList.remove("show");undoStack=[];},4000);
-}
-function doUndo(){
-  if(!undoStack.length) return;
-  cats=JSON.parse(JSON.stringify(undoStack[0].snap));
-  undoStack=[];clearTimeout(undoTimer);
-  document.getElementById("undoSnack").classList.remove("show");
-  save();render();toast("되돌렸어요");
-}
+                    {/* Status Indicator */}
+                    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+                        {loading && (
+                            <div className="bg-black text-white px-4 py-2 rounded-full text-[10px] font-black tracking-widest flex items-center gap-2 shadow-2xl animate-pulse">
+                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div> SYNCING
+                            </div>
+                        )}
+                        <div id="toast" className={`bg-black text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-2xl transition-all duration-300 opacity-0 translate-y-4 ${toastMsg ? 'toast-active' : ''}`}>
+                            {toastMsg}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
-// ══ EDIT MODE ══
-function toggleEdit(){
-  editMode=!editMode;
-  const btn=document.getElementById("editBtn");
-  btn.textContent=editMode?"✅":"✏️";
-  btn.classList.toggle("edit-on",editMode);
-  document.getElementById("editBanner").className=editMode?"edit-banner show":"edit-banner";
-  render();
-}
-
-// ══ SEARCH / FILTER ══
-function onSearch(v){
-  searchQuery=v.trim();
-  document.getElementById("searchClear").style.display=v?"flex":"none";
-  render();
-}
-function clearSearch(){document.getElementById("searchInput").value="";onSearch("");}
-function setFilter(id){currentFilter=id;renderFilter();renderGrid();}
-
-// ══ CAT ACTIONS ══
-function openCatEdit(catId){
-  if(!editMode) return;
-  editingCatId=catId;
-  const cat=cats.find(c=>c.id===catId);
-  document.getElementById("catNameInput").value=cat.title;
-  openSheet("catEditSheet");
-  setTimeout(()=>document.getElementById("catNameInput").focus(),300);
-}
-function saveCatName(){
-  const v=document.getElementById("catNameInput").value.trim();
-  if(v&&editingCatId){
-    const cat=cats.find(c=>c.id===editingCatId);
-    cat.title=v;save();render();
-  }
-  closeSheet("catEditSheet");editingCatId=null;
-}
-function deleteCat(catId){
-  const cat=cats.find(c=>c.id===catId);
-  if(!confirm(`"${cat.title}" 카테고리 전체를 삭제할까요?\n(${cat.ideas.length}개 아이디어 포함)`)) return;
-  pushUndo(`"${cat.title}" 삭제됨`,cats);
-  cats=cats.filter(c=>c.id!==catId);
-  save();render();
-}
-function addCategory(){
-  const name=prompt("새 카테고리 이름:");
-  if(!name||!name.trim()) return;
-  const colors=["#7F77DD","#D85A30","#1D9E75","#378ADD","#BA7517","#639922","#D4537E","#5DCAA5"];
-  cats.push({id:"c_"+Date.now(),title:name.trim(),color:colors[cats.length%colors.length],ideas:[]});
-  save();render();toast(`"${name.trim()}" 추가됨`);
-}
-
-// ══ IDEA ACTIONS ══
-function openIdeaEdit(catId,idx){
-  if(!editMode) return;
-  editingIdeaKey={catId,idx};
-  const idea=cats.find(c=>c.id===catId).ideas[idx];
-  document.getElementById("ideaNameInput").value=idea.name;
-  document.getElementById("ideaAiToggle").checked=idea.ai;
-  openSheet("ideaEditSheet");
-  setTimeout(()=>document.getElementById("ideaNameInput").focus(),300);
-}
-function saveIdeaEdit(){
-  if(!editingIdeaKey) return;
-  const{catId,idx}=editingIdeaKey;
-  const v=document.getElementById("ideaNameInput").value.trim();
-  const ai=document.getElementById("ideaAiToggle").checked;
-  if(v){
-    cats.find(c=>c.id===catId).ideas[idx]={name:v,ai};
-    save();render();
-  }
-  closeSheet("ideaEditSheet");editingIdeaKey=null;
-}
-function deleteIdea(catId,idx){
-  const cat=cats.find(c=>c.id===catId);
-  const name=cat.ideas[idx].name;
-  pushUndo(`"${name}" 삭제됨`,cats);
-  cat.ideas.splice(idx,1);
-  save();render();
-}
-function toggleAIBadge(catId,idx,e){
-  e.stopPropagation();
-  if(!editMode) return;
-  const cat=cats.find(c=>c.id===catId);
-  cat.ideas[idx].ai=!cat.ideas[idx].ai;
-  save();render();
-}
-function addIdea(catId){
-  const inp=document.getElementById("ai-"+catId);
-  const tog=document.getElementById("at-"+catId);
-  if(!inp) return;
-  const v=inp.value.trim();
-  if(!v){inp.focus();return;}
-  cats.find(c=>c.id===catId).ideas.push({name:v,ai:tog?tog.checked:false});
-  inp.value="";if(tog)tog.checked=false;
-  save();render();toast(`"${v}" 추가됨`);
-  setTimeout(()=>{const ni=document.getElementById("ai-"+catId);if(ni)ni.focus();},50);
-}
-
-// ══ PROMPT ══
-function openPrompt(name,catId,ai){
-  if(editMode) return;
-  pendingPrompt=`앱명: ${name}\n목적: ${name}에 맞는 기능 구현\nAI여부: ${ai?"Gemini API":"AI 없음"}\nDB방식: ${DB_MAP[catId]||"localStorage"}\n\n위 조건으로 앱 만들어줘`;
-  document.getElementById("promptPreview").textContent=pendingPrompt;
-  openSheet("promptSheet");
-}
-function confirmCopy(){
-  if(!pendingPrompt) return;
-  navigator.clipboard.writeText(pendingPrompt).then(()=>{closeSheet("promptSheet");toast("복사됨 ✓ — 새 대화에 붙여넣기 하세요");})
-  .catch(()=>{const ta=document.createElement("textarea");ta.value=pendingPrompt;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);closeSheet("promptSheet");toast("복사됨 ✓");});
-}
-
-// ══ EXPORT / IMPORT / RESET ══
-function exportData(){
-  const blob=new Blob([JSON.stringify(cats,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");a.href=url;a.download=`ideabank_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();URL.revokeObjectURL(url);toast("백업 다운로드됨");
-}
-function importData(e){
-  const file=e.target.files[0];if(!file) return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    try{
-      const d=JSON.parse(ev.target.result);
-      if(!Array.isArray(d)) throw new Error();
-      pushUndo("복원 전 상태",cats);
-      cats=d;save();render();toast("복원됨 ✓");
-    }catch{toast("파일 형식이 맞지 않아요");}
-  };
-  r.readAsText(file);e.target.value="";
-}
-function resetData(){
-  if(!confirm("기본 데이터로 초기화할까요?\n현재 데이터는 사라져요.")) return;
-  pushUndo("초기화 전 상태",cats);
-  cats=JSON.parse(JSON.stringify(DEFAULTS));
-  save();render();toast("초기화됨");
-}
-
-// ══ SHEET HELPERS ══
-function openSheet(id){document.getElementById("sheetsUrlInput")&&(document.getElementById("sheetsUrlInput").value=sheetsUrl);document.getElementById(id).classList.add("open");}
-function closeSheet(id){document.getElementById(id).classList.remove("open");}
-function openMenu(){openSheet("menuSheet");}
-["sheetsSheet","promptSheet","menuSheet","ideaEditSheet","catEditSheet"].forEach(id=>{
-  document.getElementById(id).addEventListener("click",e=>{if(e.target===e.currentTarget)closeSheet(id);});
-});
-
-// ══ HIGHLIGHT ══
-function hl(text,q){
-  if(!q) return text;
-  return text.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`,"gi"),"<mark>$1</mark>");
-}
-
-// ══ RENDER ══
-function render(){renderStats();renderFilter();renderGrid();}
-
-function renderStats(){
-  const all=cats.flatMap(c=>c.ideas);
-  const t=all.length,ai=all.filter(i=>i.ai).length;
-  document.getElementById("statsBar").innerHTML=`
-    <div class="stat"><span class="stat-n">${t}</span><span class="stat-l">전체</span></div>
-    <div class="stat"><span class="stat-n">${cats.length}</span><span class="stat-l">카테고리</span></div>
-    <div class="stat"><span class="stat-n">${ai}</span><span class="stat-l">AI 필요</span></div>
-    <div class="stat"><span class="stat-n">${t-ai}</span><span class="stat-l">단순 구현</span></div>`;
-}
-
-function renderFilter(){
-  document.getElementById("filterBar").innerHTML=
-    [["all","전체"],...cats.map(c=>[c.id,c.title.split("·")[0]])]
-    .map(([id,label])=>`<button class="chip${currentFilter===id?" active":""}" onclick="setFilter('${id}')">${label}</button>`)
-    .join("");
-}
-
-function renderGrid(){
-  let filtered=currentFilter==="all"?cats:cats.filter(c=>c.id===currentFilter);
-  if(searchQuery){
-    filtered=filtered.map(cat=>{
-      const ideas=cat.ideas.filter(i=>i.name.includes(searchQuery));
-      return ideas.length?{...cat,ideas}:null;
-    }).filter(Boolean);
-  }
-  const grid=document.getElementById("grid");
-  if(!filtered.length){
-    grid.innerHTML=`<div style="text-align:center;padding:3rem;color:var(--hint);font-size:14px;">${searchQuery?`"${searchQuery}" 검색 결과 없음`:"아이디어가 없어요"}</div>`;
-    return;
-  }
-
-  const addCatBtn=editMode?`<button class="add-cat-btn show" onclick="addCategory()"><span style="font-size:18px">+</span> 카테고리 추가</button>`:"";
-
-  const cards=filtered.map(cat=>{
-    const rows=cat.ideas.map((idea,i)=>{
-      const badge=idea.ai
-        ?`<span class="badge b-ai badge-tap" onclick="toggleAIBadge('${cat.id}',${i},event)">AI</span>`
-        :`<span class="badge b-plain badge-tap" onclick="toggleAIBadge('${cat.id}',${i},event)">단순</span>`;
-      const nameHtml=hl(idea.name,searchQuery);
-      if(editMode){
-        return `<div class="idea-row">
-          <button class="idea-main" onclick="openIdeaEdit('${cat.id}',${i})"><span>${nameHtml}</span><span class="r">${badge}</span></button>
-          <button class="del-idea" onclick="deleteIdea('${cat.id}',${i})">🗑</button>
-        </div>`;
-      } else {
-        return `<div class="idea-row">
-          <button class="idea-main" onclick="openPrompt('${idea.name.replace(/'/g,"\\'")}','${cat.id}',${idea.ai})">
-            <span>${nameHtml}</span><span class="r">${badge}<span class="arr">↗</span></span>
-          </button>
-        </div>`;
-      }
-    }).join("");
-
-    const addRow=`<div class="add-row">
-      <div class="add-input-row">
-        <input class="add-in" id="ai-${cat.id}" placeholder="새 아이디어 입력..." onkeydown="if(event.key==='Enter')addIdea('${cat.id}')">
-        <button class="add-ok" onclick="addIdea('${cat.id}')">추가</button>
-      </div>
-      <div class="add-ai-row">
-        <label class="add-ai-label">
-          <label class="tog-wrap">
-            <input type="checkbox" id="at-${cat.id}">
-            <span class="tog-track"></span>
-            <span class="tog-thumb"></span>
-          </label>
-          AI 연동 필요
-        </label>
-      </div>
-    </div>`;
-
-    const catDelBtn=editMode?`<button class="cat-del" onclick="deleteCat('${cat.id}')">🗑</button>`:"";
-
-    return `<div class="cat-card${editMode?" edit-active":""}">
-      <div class="cat-head">
-        <div class="cat-dot" style="background:${cat.color}"></div>
-        <span class="cat-title" onclick="openCatEdit('${cat.id}')">${cat.title}</span>
-        <span class="cat-count">${cat.ideas.length}</span>
-        ${catDelBtn}
-      </div>
-      <div class="idea-list">${rows}</div>
-      ${addRow}
-    </div>`;
-  }).join("");
-
-  grid.innerHTML=addCatBtn+cards;
-}
-
-// ══ TOAST ══
-let toastT;
-function toast(msg){
-  const el=document.getElementById("toastEl");
-  el.textContent=msg;el.classList.add("show");
-  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),2500);
-}
-
-// ══ INIT ══
-loadData();
-render();
-// 앱 열 때 Sheets에서 최신 데이터 불러오기
-if(sheetsUrl) pullFromSheets();
-</script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
