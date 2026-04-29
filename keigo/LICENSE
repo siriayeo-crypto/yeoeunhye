@@ -1,0 +1,45 @@
+Copyright (c) 2026 여은혜 (Eunhye Yeo). All rights reserved.
+
+이 소프트웨어(한일 경어 변환기)의 소스 코드와 디자인에 대한 모든 권리는
+저작권자 '여은혜'에게 있습니다.
+
+1. 허용되는 범위:
+   - 본 코드를 개인적인 학습, 연구, 코드 리뷰 목적으로 열람하는 행위.
+   - 개인적인 용도로 로컬 환경에서 실행해 보는 행위.
+
+2. 엄격히 금지되는 행위:
+   - 저작권자의 명시적인 서면 동의 없는 본 프로그램의 상업적 이용
+     (판매, 광고 수익 창출 등).
+   - 본 코드를 수정하거나 그대로 사용하여 별도의 서비스나
+     애플리케이션으로 재배포하는 행위.
+   - 본 저작권 표시를 삭제하거나 변경하는 행위.
+
+본 소프트웨어는 '있는 그대로' 제공되며, 사용 중에 발생하는 어떠한
+문제에 대해서도 저작권자는 책임을 지지 않습니다.
+
+문의: yeoeh525@gmail.com
+
+─────────────────────────────────────────────────────────────────────
+
+Copyright (c) 2026 여은혜 (Eunhye Yeo). All rights reserved.
+
+All rights to the source code and design of this software
+(Korean-Japanese Keigo Converter) are owned by the copyright holder,
+Eunhye Yeo.
+
+1. Permitted Uses:
+   - Viewing the code for personal learning, research, or code review.
+   - Running the software locally for personal, non-commercial use.
+
+2. Strictly Prohibited:
+   - Any commercial use of this software (including sales or
+     advertisement revenue generation) without the explicit written
+     consent of the copyright holder.
+   - Redistributing this code, whether modified or unmodified, as a
+     separate service or application.
+   - Removing or altering this copyright notice.
+
+This software is provided "as is." The copyright holder shall not be
+held liable for any issues arising from its use.
+
+Contact: yeoeh525@gmail.com
