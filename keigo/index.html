@@ -824,6 +824,10 @@ ${pronunSection}
 [변환포인트] (핵심 어휘/어미 특징 한 줄)`;
 
   try {
+    // 브라우저 타임아웃 50초 설정
+    const fetchController = new AbortController();
+    const fetchTimeout = setTimeout(() => fetchController.abort(), 50000);
+
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: {
@@ -833,8 +837,11 @@ ${pronunSection}
         model: 'google/gemini-2.0-flash-001',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.25
-      })
+      }),
+      signal: fetchController.signal,
     });
+
+    clearTimeout(fetchTimeout);
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -893,7 +900,9 @@ ${pronunSection}
 
   } catch (err) {
     console.error(err);
-    const msg = err.message.includes('503')
+    const msg = (err.name === 'AbortError')
+      ? '응답 시간이 초과됐습니다. 다시 시도해주세요.'
+      : err.message.includes('503')
       ? '서비스가 일시 중단되었습니다. 잠시 후 다시 시도해주세요.'
       : err.message.includes('429')
       ? '요청이 너무 많습니다. 1분 후 다시 시도해주세요.'
