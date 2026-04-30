@@ -885,6 +885,9 @@ ${pronunSection}
     const points = getTag('변환포인트', []);
 
     // ── DOM 업데이트 ──
+    // ★ 결과 언어를 카드에 고정 저장 (TTS가 나중에 이 값을 읽음)
+    document.getElementById('resultCard').dataset.lang = capturedResultLang;
+
     renderWordSpans(finalResult, capturedResultLang);
     renderPronun(capturedResultLang, hiragana, koPronun, katakana);
 
@@ -1014,7 +1017,11 @@ function speakFromWord(startIdx) {
   const spans = Array.from(document.querySelectorAll('#resultText .word-span'));
   if (!spans.length || startIdx >= spans.length) return;
 
-  const sep       = resultLang === 'ja' ? '' : ' ';
+  // ★ 전역변수 대신 결과 카드에 고정된 언어값을 읽음
+  // → 입력창에 새 문장을 써도 TTS 언어가 바뀌지 않음
+  const cardLang = document.getElementById('resultCard').dataset.lang || resultLang;
+
+  const sep       = cardLang === 'ja' ? '' : ' ';
   const speakText = spans.slice(startIdx).map(s => s.textContent).join(sep)
                          .replace(/[*#_~`]/g, '');
   if (!speakText.trim()) return;
@@ -1023,8 +1030,8 @@ function speakFromWord(startIdx) {
   const utt   = new SpeechSynthesisUtterance(speakText);
   const speed = parseFloat(document.getElementById('speedSlider').value);
 
-  // ★ TTS 언어를 resultLang으로 명확히 고정
-  utt.lang = resultLang === 'ja' ? 'ja-JP' : 'ko-KR';
+  // ★ TTS 언어를 카드 고정값으로 설정
+  utt.lang = cardLang === 'ja' ? 'ja-JP' : 'ko-KR';
   utt.rate = speed;
 
   const totalSpans  = spans.length;
@@ -1118,7 +1125,8 @@ function stopSpeak() {
 function copyResult() {
   const spans = document.querySelectorAll('#resultText .word-span');
   if (!spans.length) return;
-  const sep  = resultLang === 'ja' ? '' : ' ';
+  const cardLang = document.getElementById('resultCard').dataset.lang || resultLang;
+  const sep  = cardLang === 'ja' ? '' : ' ';
   const text = Array.from(spans).map(s => s.textContent).join(sep);
   navigator.clipboard.writeText(text).then(() => {
     showToast('클립보드에 복사되었습니다 ✓');
