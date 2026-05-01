@@ -499,19 +499,19 @@
   <div class="card">
     <div class="card-label">변환 강도 (Level 1–5)</div>
     <div class="level-row">
-      <button class="level-btn" onclick="selectLevel(this,1,'반말 (Casual)')">
+      <button class="level-btn" onclick="selectLevel(this,1,'반말')">
         <span class="level-num">1</span><span class="level-name">반말</span>
       </button>
-      <button class="level-btn" onclick="selectLevel(this,2,'정중 소 (Standard Politeness)')">
+      <button class="level-btn" onclick="selectLevel(this,2,'정중체')">
         <span class="level-num">2</span><span class="level-name">정중(소)</span>
       </button>
-      <button class="level-btn active" onclick="selectLevel(this,3,'정중 중 (Business Standard)')">
+      <button class="level-btn active" onclick="selectLevel(this,3,'표준비즈니스')">
         <span class="level-num">3</span><span class="level-name">정중(중)</span>
       </button>
-      <button class="level-btn" onclick="selectLevel(this,4,'존경/겸양 (Professional Keigo)')">
+      <button class="level-btn" onclick="selectLevel(this,4,'존경겸양어')">
         <span class="level-num">4</span><span class="level-name">존경</span>
       </button>
-      <button class="level-btn" onclick="selectLevel(this,5,'극존칭 (Maximum Formality)')">
+      <button class="level-btn" onclick="selectLevel(this,5,'극존칭')">
         <span class="level-num">5</span><span class="level-name">극존칭</span>
       </button>
     </div>
@@ -591,7 +591,7 @@
 const WORKER_URL = 'https://keigo-proxy.siriayeo.workers.dev';
 let selectedPreset    = '대면 업무상 대화';
 let selectedLevel     = 3;
-let selectedLevelName = '정중 중 (Business Standard)';
+let selectedLevelName = '표준비즈니스';
 let detectedLang      = 'ko';   // 입력 언어
 let resultLang        = 'ja';   // 출력 언어 — TTS/발음 기준
 let wordTokens        = [];
@@ -753,6 +753,11 @@ function selectLevel(el, val, name) {
 }
 
 function handleInput(val) {
+  if (!val.trim()) {
+    detectedLang = 'ko';
+    document.getElementById('langBadge').textContent = '언어 감지';
+    return;
+  }
   const isJp = /[\u3040-\u30ff\u4e00-\u9fff]/.test(val);
   detectedLang = isJp ? 'ja' : 'ko';
   document.getElementById('langBadge').textContent =
@@ -794,10 +799,10 @@ async function performConversion() {
   const outputLang = capturedResultLang === 'ja' ? '일본어' : '한국어';
 
   let scenarioGuide = '';
-  if (selectedPreset.includes('대면'))   scenarioGuide = '대화체(구어체) 위주로 자연스럽게 구성하세요.';
-  if (selectedPreset.includes('메신저')) scenarioGuide = '간결하면서도 상황에 맞는 격식을 갖추세요.';
-  if (selectedPreset.includes('이메일')) scenarioGuide = '격식 있는 문어체 표현과 비즈니스 관용구를 사용하세요.';
-  if (selectedPreset.includes('공문서')) scenarioGuide = '매우 정중하고 공식적인 서술형 문장으로 구성하세요.';
+  if (selectedPreset.includes('대면'))              scenarioGuide = '대화체(구어체) 위주로 자연스럽게 구성하세요.';
+  if (selectedPreset.includes('메신저') || selectedPreset.includes('채팅')) scenarioGuide = '간결하면서도 상황에 맞는 격식을 갖추세요.';
+  if (selectedPreset.includes('이메일'))            scenarioGuide = '격식 있는 문어체 표현과 비즈니스 관용구를 사용하세요.';
+  if (selectedPreset.includes('공문서'))            scenarioGuide = '매우 정중하고 공식적인 서술형 문장으로 구성하세요.';
 
   // 방향별 발음 지시 (명확하게 분리)
   const pronunSection = capturedResultLang === 'ja'
@@ -807,19 +812,22 @@ async function performConversion() {
 
   const prompt = `당신은 한국어와 일본어 경어 전문가입니다. 아래 지시를 정확히 따르세요.
 
+⚠️ 절대 규칙: 번역결과는 반드시 ${outputLang}로만 작성하세요. 어떤 경우에도 입력 언어로 응답하지 마세요. 레벨이 높아도 출력 언어는 변하지 않습니다.
+
 [번역 조건]
 - 상황: ${selectedPreset} / ${scenarioGuide}
 - 경어 강도: Level ${selectedLevel} (${selectedLevelName})
-  Lv1=반말(タメ口) Lv2=데스마스체 Lv3=표준비즈니스 Lv4=존경/겸양어 Lv5=극존칭
+  Lv1=반말(タメ口/해체) Lv2=데스마스체(합쇼체) Lv3=표준비즈니스(정중체) Lv4=존경/겸양어(경어체) Lv5=최고극존칭(최상위경어)
+  ※ 경어 레벨은 표현의 격식 수준만 변경합니다. 출력 언어(${outputLang})는 절대 바뀌지 않습니다.
 
 [입력]
 "${text}"
 
-[출력 언어]
-${outputLang}로만 번역하세요.
+[출력 언어] ★ 필수 ★
+무조건 ${outputLang}로만 번역하세요. 절대로 ${detectedLang === 'ko' ? '한국어' : '일본어'}로 출력하지 마세요.
 
 [응답 형식 — 반드시 이 태그와 순서 그대로, 각 줄에 하나씩]
-[번역결과] (번역된 문장 한 줄, 특수문자·마크다운 금지)
+[번역결과] (${outputLang}로 번역된 문장 한 줄, 특수문자·마크다운 금지)
 ${pronunSection}
 [변환포인트] (핵심 어휘/어미 특징 한 줄)`;
 
@@ -868,6 +876,24 @@ ${pronunSection}
       : ['가타카나','변환포인트']);
 
     if (!finalResult) throw new Error('번역 결과를 파싱할 수 없습니다');
+
+    // ── 출력 언어 검증 ──
+    // 한→일 방향인데 결과에 한글이 많으면 AI가 잘못 응답한 것
+    if (capturedResultLang === 'ja') {
+      const hangulCount  = (finalResult.match(/[가-힣]/g) || []).length;
+      const japaneseCount = (finalResult.match(/[\u3040-\u30ff\u4e00-\u9fff]/g) || []).length;
+      if (hangulCount > japaneseCount && finalResult.length > 5) {
+        throw new Error('AI가 잘못된 언어로 응답했습니다. 다시 시도해주세요.');
+      }
+    }
+    // 일→한 방향인데 결과에 일본어가 많으면 마찬가지
+    if (capturedResultLang === 'ko') {
+      const hangulCount  = (finalResult.match(/[가-힣]/g) || []).length;
+      const japaneseCount = (finalResult.match(/[\u3040-\u30ff\u4e00-\u9fff]/g) || []).length;
+      if (japaneseCount > hangulCount && finalResult.length > 5) {
+        throw new Error('AI가 잘못된 언어로 응답했습니다. 다시 시도해주세요.');
+      }
+    }
 
     // 발음 파싱 — 방향별로 완전히 분리
     let hiragana = '', koPronun = '', katakana = '';
